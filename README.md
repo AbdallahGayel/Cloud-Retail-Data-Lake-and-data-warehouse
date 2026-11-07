@@ -269,7 +269,8 @@ A phase is complete only when:
 - actual versions and test evidence are recorded;
 - no unverified performance or reliability claim is made.
 
-![Cloud Retail Data Lakehouse Architecture](docs/Cloud%20Retail%20Data%20Lakehouse%20Architecture.png)
+![Blueprint Diagram](docs/Blueprint_Digram.png)
+
 ## 17. Open questions
 
 - Which retail dataset will seed the three operational stores?
