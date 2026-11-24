@@ -1,0 +1,39 @@
+# Local review, assessment, reconciliation & generated HTML reports
+readonly_assessment/
+Reconcilation/
+*.html
+
+# Local assistant & governance files (kept locally on disk only)
+.agents/
+AGENTS.md
+README_FIRST.md
+docs/agent-prompts/
+docs/reference/Retail_Lakehouse_First_Agent_Prompt.md
+
+# Raw source datasets & runtime logs
+datasets/
+logs/
+
+# Python, Jupyter & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Environment variables, certificates, keys & backups
+.env
+*.env
+!.env.example
+*.key
+*.pem
+*.crt
+*.pfx
+*.p12
+*.bak
+
+# OS / Editor files
+.DS_Store
+Thumbs.db

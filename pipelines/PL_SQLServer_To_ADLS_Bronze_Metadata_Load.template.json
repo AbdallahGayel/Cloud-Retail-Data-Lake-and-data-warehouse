@@ -1,0 +1,210 @@
+{
+  "name": "PL_SQLServer_To_ADLS_Bronze_Metadata_Load",
+  "properties": {
+    "description": "Metadata-driven Fabric Data Pipeline template that copies 10 SQL Server tables to ADLS Gen2 Bronze (Parquet/Snappy) and exports nested MongoDB order_reviews BSON documents to ADLS Gen2 Bronze (JSON).",
+    "activities": [
+      {
+        "name": "Lookup_Bronze_Table_List",
+        "description": "Retrieves the approved list of 10 SQL Server tables and their corresponding ADLS Gen2 Bronze destination paths. This metadata drives the sequential full-load process through a ForEach activity.",
+        "type": "Lookup",
+        "dependsOn": [],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 3,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "source": {
+            "type": "SqlServerSource",
+            "sqlReaderQuery": "SELECT TaskOrder, SchemaName, TableName, FolderPath\nFROM (VALUES\n(1,'dbo','customers','crm/customers'),\n(2,'dbo','orders','sales/orders'),\n(3,'dbo','order_items','sales/order_items'),\n(4,'dbo','order_payments','sales/order_payments'),\n(5,'dbo','products','catalog/products'),\n(6,'dbo','sellers','catalog/sellers'),\n(7,'dbo','product_category_name_translation','catalog/product_category_name_translation'),\n(8,'dbo','dim_geolocation','reference/dim_geolocation'),\n(9,'dbo','marketing_qualified_leads','marketing/marketing_qualified_leads'),\n(10,'dbo','closed_deals','marketing/closed_deals')\n) AS T(TaskOrder, SchemaName, TableName, FolderPath)\nORDER BY TaskOrder;",
+            "queryTimeout": "02:00:00",
+            "partitionOption": "None"
+          },
+          "firstRowOnly": false,
+          "datasetSettings": {
+            "annotations": [],
+            "type": "SqlServerTable",
+            "schema": [],
+            "typeProperties": {
+              "database": "Cloud_Retail_Data_Lakehouse_v2"
+            },
+            "externalReferences": {
+              "connection": "<FABRIC_SQLSERVER_CONNECTION_ID>"
+            }
+          }
+        }
+      },
+      {
+        "name": "FE_Load_Bronze_Tables",
+        "description": "Iterates through the approved SQL Server table metadata and sequentially copies each table to its assigned ADLS Gen2 Bronze folder in Parquet format.",
+        "type": "ForEach",
+        "dependsOn": [
+          {
+            "activity": "Lookup_Bronze_Table_List",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "typeProperties": {
+          "items": {
+            "value": "@activity('Lookup_Bronze_Table_List').output.value",
+            "type": "Expression"
+          },
+          "isSequential": true,
+          "activities": [
+            {
+              "name": "Copy_Current_Table_To_Bronze",
+              "description": "Copies the current SQL Server table to its dedicated ADLS Gen2 Bronze folder in Parquet format using dynamic metadata.",
+              "type": "Copy",
+              "dependsOn": [],
+              "policy": {
+                "timeout": "0.12:00:00",
+                "retry": 0,
+                "retryIntervalInSeconds": 30,
+                "secureOutput": false,
+                "secureInput": false
+              },
+              "typeProperties": {
+                "source": {
+                  "type": "SqlServerSource",
+                  "sqlReaderQuery": {
+                    "value": "@concat(\n    'SELECT * FROM [',\n    item().SchemaName,\n    '].[',\n    item().TableName,\n    ']'\n)",
+                    "type": "Expression"
+                  },
+                  "queryTimeout": "02:00:00",
+                  "partitionOption": "None",
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "SqlServerTable",
+                    "schema": [],
+                    "typeProperties": {
+                      "database": "Cloud_Retail_Data_Lakehouse_v2"
+                    },
+                    "externalReferences": {
+                      "connection": "<FABRIC_SQLSERVER_CONNECTION_ID>"
+                    }
+                  }
+                },
+                "sink": {
+                  "type": "ParquetSink",
+                  "storeSettings": {
+                    "type": "AzureBlobFSWriteSettings"
+                  },
+                  "formatSettings": {
+                    "type": "ParquetWriteSettings",
+                    "enableVertiParquet": true
+                  },
+                  "datasetSettings": {
+                    "annotations": [],
+                    "type": "Parquet",
+                    "typeProperties": {
+                      "location": {
+                        "type": "AzureBlobFSLocation",
+                        "fileName": {
+                          "value": "@concat(\n    item().TableName,\n    '_',\n    formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'),\n    '_',\n    pipeline().RunId,\n    '.parquet'\n)",
+                          "type": "Expression"
+                        },
+                        "folderPath": {
+                          "value": "@concat('bronze/', item().FolderPath)",
+                          "type": "Expression"
+                        },
+                        "fileSystem": "retail-lakehouse"
+                      },
+                      "compressionCodec": "snappy"
+                    },
+                    "schema": [],
+                    "externalReferences": {
+                      "connection": "<FABRIC_ADLS_CONNECTION_ID>"
+                    }
+                  }
+                },
+                "enableStaging": false,
+                "validateDataConsistency": true,
+                "translator": {
+                  "type": "TabularTranslator",
+                  "typeConversion": true,
+                  "typeConversionSettings": {
+                    "allowDataTruncation": true,
+                    "treatBooleanAsNumber": false
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "Copy_MongoDB_Reviews_To_Bronze",
+        "description": "Copies nested BSON documents from local MongoDB (retail_reviews.order_reviews) via On-Premises Data Gateway + TLS into ADLS Gen2 Bronze JSON files.",
+        "type": "Copy",
+        "dependsOn": [
+          {
+            "activity": "FE_Load_Bronze_Tables",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "source": {
+            "type": "MongoDbV2Source",
+            "batchSize": 10000,
+            "cursorMethods": {},
+            "datasetSettings": {
+              "annotations": [],
+              "type": "MongoDbV2Collection",
+              "schema": [],
+              "typeProperties": {
+                "collection": "order_reviews",
+                "database": "retail_reviews"
+              },
+              "externalReferences": {
+                "connection": "<FABRIC_MONGODB_CONNECTION_ID>"
+              }
+            }
+          },
+          "sink": {
+            "type": "JsonSink",
+            "storeSettings": {
+              "type": "AzureBlobFSWriteSettings"
+            },
+            "formatSettings": {
+              "type": "JsonWriteSettings",
+              "filePattern": "setOfObjects"
+            },
+            "datasetSettings": {
+              "annotations": [],
+              "type": "Json",
+              "typeProperties": {
+                "location": {
+                  "type": "AzureBlobFSLocation",
+                  "fileName": {
+                    "value": "@concat('order_reviews_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.json')",
+                    "type": "Expression"
+                  },
+                  "folderPath": "bronze/reviews/order_reviews",
+                  "fileSystem": "retail-lakehouse"
+                }
+              },
+              "schema": [],
+              "externalReferences": {
+                "connection": "<FABRIC_ADLS_CONNECTION_ID>"
+              }
+            }
+          },
+          "enableStaging": false
+        }
+      }
+    ]
+  }
+}

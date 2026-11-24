@@ -1,0 +1,56 @@
+flowchart LR
+    subgraph SRC["1. Source Systems (Local / On-Premises)"]
+        SQL[("SQL Server<br/>Cloud_Retail_Data_Lakehouse_v2<br/>10 tables: Sales, CRM, Catalog, Ref, Marketing")]
+        MONGO[("MongoDB 8.3 (TLS + SCRAM-SHA-256)<br/>retail_reviews.order_reviews<br/>99,224 nested BSON documents")]
+        SIM["Python Retail Simulator<br/>Synthetic Event Producer (Target / Gate)"]
+    end
+
+    subgraph INGEST["2. Hybrid Ingestion & Gateway"]
+        GW["On-Premises Data Gateway<br/>Registered in Microsoft Fabric"]
+        PIPE["Fabric Data Pipeline<br/>PL_SQLServer_To_ADLS_Bronze_Metadata_Load<br/>Metadata Lookup + ForEach + MongoDB Copy"]
+        EH["Event Hubs Protocol -> Fabric Eventstream<br/>Tested (20 rows) / Kafka SAS Unverified"]
+        SQL --> GW
+        MONGO --> GW
+        GW --> PIPE
+        SIM -. "event stream" .-> EH
+    end
+
+    subgraph OPEN["3. Canonical Open Lakehouse — ADLS Gen2 (retail-lakehouse)"]
+        ADLS[("ADLS Gen2 (RBAC / ABFSS)<br/>Canonical Physical Source of Truth")]
+        BRONZE["Bronze Layer<br/>10 SQL Parquet (Snappy/VertiParquet)<br/>+ 1 MongoDB JSON (99,224 docs)"]
+        GOLD_OPEN["Gold Dimensional Model (Target)<br/>Iceberg v2 + Parquet Star Schema"]
+        CAT["Apache Polaris Catalog<br/>Compatibility Gate"]
+        PIPE --> BRONZE
+        ADLS --- BRONZE
+        ADLS --- GOLD_OPEN
+        CAT -. "catalog metadata" .- GOLD_OPEN
+    end
+
+    subgraph FAB["4. Microsoft Fabric — Managed Analytics Lane (dev_env)"]
+        SHORT["OneLake Shortcut (Verified)<br/>bronze/ -> ADLS Gen2 Read Path"]
+        SPARK["Fabric Spark / PySpark<br/>10/11 Silver Notebooks Ready + 1 Draft"]
+        SILVER["Silver Delta Lake Layer<br/>11 Conformed Entities + Quarantine<br/>(Validated in Retail_Analytics_Lakehouse)"]
+        SQLEND["Fabric SQL Analytics Endpoint<br/>Read-Optimized SQL Validation"]
+        BRONZE --> SHORT --> SPARK --> SILVER --> SQLEND
+        SILVER -. "curate & conform (Next Phase)" .-> GOLD_OPEN
+        EH -. "Fabric-native Delta" .-> SILVER
+    end
+
+    subgraph SERVE["5. Analytics Warehouse & BI Serving (Target / Gates)"]
+        CH[("ClickHouse Cloud<br/>Primary OLAP Engine<br/>Direct Iceberg Read Gate")]
+        MT["Selective MergeTree Marts<br/>Only if Benchmark Justifies"]
+        PBI["Power BI<br/>Semantic Model & Dashboards<br/>(Connection Gate)"]
+        MIRROR["Fabric Mirroring (SQL CDC)<br/>Candidate — Not Proven"]
+        GOLD_OPEN -->|Direct Iceberg Read Gate| CH
+        GOLD_OPEN -.->|Controlled Extract if Justified| MT --> CH
+        CH --> PBI
+        SQLEND -.-> PBI
+        SQL -. "CDC candidate" .-> MIRROR
+    end
+
+    classDef done fill:#e6f4ea,stroke:#1e7e34,color:#0d3b18,stroke-width:2px;
+    classDef managed fill:#e8f0fe,stroke:#1967d2,color:#0d3c7a,stroke-width:2px;
+    classDef gate fill:#fef7e0,stroke:#d97706,color:#78350f,stroke-dasharray: 5 3;
+    class SQL,MONGO,GW,PIPE,ADLS,BRONZE done;
+    class SHORT,SPARK,SILVER,SQLEND managed;
+    class SIM,EH,GOLD_OPEN,CAT,CH,MT,PBI,MIRROR gate;

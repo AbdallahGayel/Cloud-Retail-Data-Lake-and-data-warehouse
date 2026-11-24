@@ -1,0 +1,291 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1560 880" width="1560" height="880" font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow-solid" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#334155"/>
+    </marker>
+    <marker id="arrow-teal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0F766E"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#1D4ED8"/>
+    </marker>
+    <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#B45309"/>
+    </marker>
+    <filter id="card-shadow" x="-4%" y="-4%" width="108%" height="110%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0F172A" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <!-- Crisp Light Background -->
+  <rect width="1560" height="880" fill="#F8FAFC" rx="16"/>
+  <rect x="12" y="12" width="1536" height="856" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.5" rx="12"/>
+
+  <!-- Header -->
+  <text x="40" y="56" font-size="26" font-weight="800" fill="#0F172A" letter-spacing="-0.4">Retail Lakehouse Platform — Hybrid Architecture</text>
+  <text x="40" y="82" font-size="14" font-weight="500" fill="#475569">Canonical ADLS Gen2 Storage + Microsoft Fabric Managed Analytics Lane + ClickHouse Cloud Serving</text>
+
+  <!-- Status Legend -->
+  <g transform="translate(880, 34)">
+    <rect x="0" y="0" width="640" height="52" rx="10" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1"/>
+    <!-- Implemented -->
+    <rect x="18" y="15" width="16" height="22" rx="4" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <text x="44" y="30" font-size="12.5" font-weight="700" fill="#065F46">Implemented &amp; Verified</text>
+    <!-- Managed Fabric -->
+    <rect x="225" y="15" width="16" height="22" rx="4" fill="#EFF6FF" stroke="#2563EB" stroke-width="2"/>
+    <text x="251" y="30" font-size="12.5" font-weight="700" fill="#1E40AF">Fabric Managed Lane</text>
+    <!-- Target / Gate -->
+    <rect x="430" y="15" width="16" height="22" rx="4" fill="#FFFBEB" stroke="#D97706" stroke-width="2" stroke-dasharray="4 2"/>
+    <text x="456" y="30" font-size="12.5" font-weight="700" fill="#92400E">Target / Compatibility Gate</text>
+  </g>
+
+  <!-- ================= SWIMLANE 1: SOURCE SYSTEMS ================= -->
+  <rect x="36" y="114" width="275" height="682" rx="12" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.2"/>
+  <text x="54" y="142" font-size="12" font-weight="800" fill="#475569" letter-spacing="0.8">1. ON-PREMISES SOURCES</text>
+
+  <!-- SQL Server Card -->
+  <g transform="translate(52, 164)" filter="url(#card-shadow)">
+    <rect width="243" height="178" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <rect x="14" y="14" width="108" height="22" rx="11" fill="#059669"/>
+    <text x="68" y="29" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">IMPLEMENTED</text>
+    <text x="14" y="60" font-size="16" font-weight="800" fill="#0F172A">SQL Server (On-Prem)</text>
+    <text x="14" y="80" font-size="12.5" font-weight="600" fill="#065F46">Cloud_Retail_Data_Lakehouse_v2</text>
+    <line x1="14" y1="92" x2="229" y2="92" stroke="#A7F3D0" stroke-width="1"/>
+    <text x="14" y="112" font-size="12" fill="#334155">&#8226; 10 Tables (CRM, Sales, Catalog,</text>
+    <text x="22" y="129" font-size="12" fill="#334155">Reference, Marketing Funnel)</text>
+    <text x="14" y="149" font-size="12" fill="#334155">&#8226; BULK INSERT (LF 0x0a + staging)</text>
+    <text x="14" y="167" font-size="12" font-weight="700" fill="#065F46">~1,366,645 raw SQL rows</text>
+  </g>
+
+  <!-- MongoDB Card -->
+  <g transform="translate(52, 366)" filter="url(#card-shadow)">
+    <rect width="243" height="190" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <rect x="14" y="14" width="108" height="22" rx="11" fill="#059669"/>
+    <text x="68" y="29" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">IMPLEMENTED</text>
+    <text x="14" y="60" font-size="16" font-weight="800" fill="#0F172A">MongoDB 8.3 (On-Prem)</text>
+    <text x="14" y="80" font-size="12.5" font-weight="600" fill="#065F46">retail_reviews.order_reviews</text>
+    <line x1="14" y1="92" x2="229" y2="92" stroke="#A7F3D0" stroke-width="1"/>
+    <text x="14" y="112" font-size="12" fill="#334155">&#8226; Nested BSON (comment, lineage)</text>
+    <text x="14" y="131" font-size="12" fill="#334155">&#8226; TLS (preferTLS + Trusted Root)</text>
+    <text x="14" y="150" font-size="12" fill="#334155">&#8226; SCRAM-SHA-256 read account</text>
+    <text x="14" y="172" font-size="12" font-weight="700" fill="#065F46">99,224 BSON docs + quarantine log</text>
+  </g>
+
+  <!-- Python Event Simulator Card (Target) -->
+  <g transform="translate(52, 580)" filter="url(#card-shadow)">
+    <rect width="243" height="190" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="2" stroke-dasharray="6 4"/>
+    <rect x="14" y="14" width="136" height="22" rx="11" fill="#D97706"/>
+    <text x="82" y="29" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">GATE / FUTURE PHASE</text>
+    <text x="14" y="60" font-size="16" font-weight="800" fill="#0F172A">Python Event Simulator</text>
+    <text x="14" y="80" font-size="12.5" font-weight="600" fill="#92400E">Synthetic Streaming Events</text>
+    <line x1="14" y1="92" x2="229" y2="92" stroke="#FDE68A" stroke-width="1"/>
+    <text x="14" y="112" font-size="12" fill="#334155">&#8226; Event Hubs protocol tested</text>
+    <text x="22" y="129" font-size="12" fill="#334155">historically (20 test events)</text>
+    <text x="14" y="149" font-size="12" fill="#334155">&#8226; Kafka + SAS on Fabric endpoint</text>
+    <text x="22" y="166" font-size="12" fill="#92400E" font-weight="700">remains unverified; Flink deferred</text>
+  </g>
+
+  <!-- ================= SWIMLANE 2: GATEWAY & INGESTION ================= -->
+  <rect x="339" y="114" width="265" height="682" rx="12" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.2"/>
+  <text x="357" y="142" font-size="12" font-weight="800" fill="#475569" letter-spacing="0.8">2. HYBRID GATEWAY &amp; INGEST</text>
+
+  <!-- On-Premises Gateway Card -->
+  <g transform="translate(355, 198)" filter="url(#card-shadow)">
+    <rect width="233" height="148" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <rect x="14" y="14" width="108" height="22" rx="11" fill="#059669"/>
+    <text x="68" y="29" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">IMPLEMENTED</text>
+    <text x="14" y="58" font-size="15.5" font-weight="800" fill="#0F172A">On-Prem Data Gateway</text>
+    <line x1="14" y1="70" x2="219" y2="70" stroke="#A7F3D0" stroke-width="1"/>
+    <text x="14" y="90" font-size="12" fill="#334155">&#8226; Bridges local SQL &amp; MongoDB</text>
+    <text x="14" y="109" font-size="12" fill="#334155">&#8226; ADLS connection authorized</text>
+    <text x="22" y="126" font-size="12" fill="#334155">for gateway utilization</text>
+  </g>
+
+  <!-- Fabric Pipeline Card -->
+  <g transform="translate(355, 376)" filter="url(#card-shadow)">
+    <rect width="233" height="186" rx="10" fill="#ECFDF5" stroke="#059669" stroke-width="2"/>
+    <rect x="14" y="14" width="108" height="22" rx="11" fill="#059669"/>
+    <text x="68" y="29" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">IMPLEMENTED</text>
+    <text x="14" y="58" font-size="15" font-weight="800" fill="#0F172A">Fabric Metadata Pipeline</text>
+    <text x="14" y="77" font-size="11" font-weight="700" fill="#065F46" font-family="'Consolas', monospace">PL_SQLServer_To_ADLS_Bronze</text>
+    <line x1="14" y1="89" x2="219" y2="89" stroke="#A7F3D0" stroke-width="1"/>
+    <text x="14" y="109" font-size="12" fill="#334155">&#8226; Lookup (10 SQL tasks) -&gt; ForEach</text>
+    <text x="14" y="128" font-size="12" fill="#334155">&#8226; Parquet + Snappy (VertiParquet)</text>
+    <text x="14" y="147" font-size="12" fill="#334155">&#8226; Copy_MongoDB_Reviews -&gt; JSON</text>
+    <text x="14" y="168" font-size="12" font-weight="700" fill="#065F46">All 11 sources landed in Bronze</text>
+  </g>
+
+  <!-- Eventstream Card -->
+  <g transform="translate(355, 592)" filter="url(#card-shadow)">
+    <rect width="233" height="178" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="2" stroke-dasharray="6 4"/>
+    <rect x="14" y="14" width="136" height="22" rx="11" fill="#D97706"/>
+    <text x="82" y="29" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">GATE / CANDIDATE</text>
+    <text x="14" y="58" font-size="15.5" font-weight="800" fill="#0F172A">Eventstream / CDC</text>
+    <line x1="14" y1="70" x2="219" y2="70" stroke="#FDE68A" stroke-width="1"/>
+    <text x="14" y="90" font-size="12" fill="#334155">&#8226; Fabric Eventstream (Event Hubs)</text>
+    <text x="14" y="109" font-size="12" fill="#334155">&#8226; Fabric Mirroring (SQL CDC)</text>
+    <text x="22" y="126" font-size="12" fill="#92400E" font-weight="700">candidate only — not proven</text>
+    <text x="14" y="149" font-size="12" fill="#334155">&#8226; Airflow &amp; Flink deferred</text>
+  </g>
+
+  <!-- ================= SWIMLANE 3: CANONICAL ADLS STORAGE ================= -->
+  <rect x="632" y="114" width="275" height="682" rx="12" fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.5"/>
+  <text x="650" y="142" font-size="12" font-weight="800" fill="#065F46" letter-spacing="0.8">3. CANONICAL OPEN STORE (ADLS)</text>
+
+  <!-- ADLS Gen2 Header Box -->
+  <g transform="translate(648, 164)" filter="url(#card-shadow)">
+    <rect width="243" height="122" rx="10" fill="#065F46" stroke="#047857" stroke-width="2"/>
+    <text x="16" y="34" font-size="16" font-weight="800" fill="#FFFFFF">ADLS Gen2 (Canonical)</text>
+    <text x="16" y="56" font-size="12.5" font-weight="600" fill="#A7F3D0">Filesystem: retail-lakehouse</text>
+    <line x1="16" y1="68" x2="227" y2="68" stroke="#10B981" stroke-width="1"/>
+    <text x="16" y="88" font-size="12" fill="#ECFDF5">&#8226; Single source of truth</text>
+    <text x="16" y="107" font-size="12" fill="#ECFDF5">&#8226; Entra RBAC + Storage Auth</text>
+  </g>
+
+  <!-- Bronze Zone -->
+  <g transform="translate(648, 308)" filter="url(#card-shadow)">
+    <rect width="243" height="170" rx="10" fill="#FFFFFF" stroke="#059669" stroke-width="2"/>
+    <rect x="14" y="14" width="108" height="22" rx="11" fill="#059669"/>
+    <text x="68" y="29" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">IMPLEMENTED</text>
+    <text x="14" y="58" font-size="16" font-weight="800" fill="#0F172A">Bronze Layer (Raw)</text>
+    <text x="14" y="77" font-size="11.5" font-weight="700" fill="#065F46" font-family="'Consolas', monospace">bronze/&lt;domain&gt;/&lt;table&gt;</text>
+    <line x1="14" y1="88" x2="229" y2="88" stroke="#D1FAE5" stroke-width="1"/>
+    <text x="14" y="108" font-size="12" fill="#334155">&#8226; 10 SQL Domains (Parquet)</text>
+    <text x="14" y="127" font-size="12" fill="#334155">&#8226; 1 MongoDB Reviews (JSON)</text>
+    <text x="14" y="146" font-size="12" font-weight="700" fill="#065F46">Replayable raw archive</text>
+  </g>
+
+  <!-- Gold Open Target -->
+  <g transform="translate(648, 502)" filter="url(#card-shadow)">
+    <rect width="243" height="148" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="2" stroke-dasharray="6 4"/>
+    <rect x="14" y="14" width="136" height="22" rx="11" fill="#D97706"/>
+    <text x="82" y="29" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">NEXT / TARGET LAYER</text>
+    <text x="14" y="58" font-size="16" font-weight="800" fill="#0F172A">Gold Star Schema</text>
+    <line x1="14" y1="70" x2="229" y2="70" stroke="#FDE68A" stroke-width="1"/>
+    <text x="14" y="90" font-size="12" fill="#334155">&#8226; Apache Iceberg v2 + Parquet</text>
+    <text x="14" y="109" font-size="12" fill="#334155">&#8226; Fact Sales, Reviews, Funnel</text>
+    <text x="14" y="128" font-size="12" fill="#92400E" font-weight="700">&#8226; Prevent order-item review fan-out</text>
+  </g>
+
+  <!-- Polaris Gate -->
+  <g transform="translate(648, 672)" filter="url(#card-shadow)">
+    <rect width="243" height="100" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="2" stroke-dasharray="6 4"/>
+    <rect x="14" y="12" width="150" height="20" rx="10" fill="#D97706"/>
+    <text x="89" y="26" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">COMPATIBILITY GATE</text>
+    <text x="14" y="54" font-size="15" font-weight="800" fill="#0F172A">Apache Polaris Catalog</text>
+    <text x="14" y="75" font-size="12" fill="#334155">Proposed Iceberg REST catalog</text>
+  </g>
+
+  <!-- ================= SWIMLANE 4: FABRIC MANAGED ANALYTICS ================= -->
+  <rect x="935" y="114" width="290" height="682" rx="12" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1.5"/>
+  <text x="953" y="142" font-size="12" font-weight="800" fill="#1E40AF" letter-spacing="0.8">4. MICROSOFT FABRIC (dev_env)</text>
+
+  <!-- OneLake Shortcut -->
+  <g transform="translate(951, 164)" filter="url(#card-shadow)">
+    <rect width="258" height="132" rx="10" fill="#FFFFFF" stroke="#2563EB" stroke-width="2"/>
+    <rect x="14" y="14" width="122" height="22" rx="11" fill="#2563EB"/>
+    <text x="75" y="29" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">VERIFIED SHORTCUT</text>
+    <text x="14" y="58" font-size="15.5" font-weight="800" fill="#0F172A">OneLake Shortcut (ADLS)</text>
+    <line x1="14" y1="70" x2="244" y2="70" stroke="#BFDBFE" stroke-width="1"/>
+    <text x="14" y="90" font-size="12" fill="#334155">&#8226; Zero-copy read path into</text>
+    <text x="22" y="107" font-size="12" fill="#334155">Retail_Analytics_Lakehouse</text>
+  </g>
+
+  <!-- Silver Spark + Delta Lake -->
+  <g transform="translate(951, 318)" filter="url(#card-shadow)">
+    <rect width="258" height="246" rx="10" fill="#FFFFFF" stroke="#2563EB" stroke-width="2"/>
+    <rect x="14" y="14" width="160" height="22" rx="11" fill="#2563EB"/>
+    <text x="94" y="29" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">10 READY + 1 DRAFT (PYSPARK)</text>
+    <text x="14" y="58" font-size="16" font-weight="800" fill="#0F172A">Silver Layer (Delta ACID)</text>
+    <text x="14" y="77" font-size="12" font-weight="700" fill="#1D4ED8">Fabric Spark + Delta Tables</text>
+    <line x1="14" y1="88" x2="244" y2="88" stroke="#BFDBFE" stroke-width="1"/>
+    <text x="14" y="108" font-size="12" fill="#334155">&#8226; Geo Centroids (19,015 + 29 quar.)</text>
+    <text x="14" y="127" font-size="12" fill="#334155">&#8226; Sellers (3,095) &amp; Customers (99,441)</text>
+    <text x="14" y="146" font-size="12" fill="#334155">&#8226; Orders (99,441) &amp; Items (112,650)</text>
+    <text x="14" y="165" font-size="12" fill="#334155">&#8226; Products (32,951) &amp; Cat Trans (71)</text>
+    <text x="14" y="184" font-size="12" fill="#334155">&#8226; MQLs (8,000) &amp; Closed Deals (842)</text>
+    <text x="14" y="203" font-size="12" fill="#334155">&#8226; Order Reviews (99,224 BSON flat)</text>
+    <text x="14" y="226" font-size="12" font-weight="700" fill="#92400E">&#8226; Order Payments (103,886 — Draft)</text>
+  </g>
+
+  <!-- SQL Analytics Endpoint -->
+  <g transform="translate(951, 586)" filter="url(#card-shadow)">
+    <rect width="258" height="122" rx="10" fill="#FFFFFF" stroke="#2563EB" stroke-width="2"/>
+    <rect x="14" y="14" width="122" height="22" rx="11" fill="#2563EB"/>
+    <text x="75" y="29" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">VERIFIED SQL QC</text>
+    <text x="14" y="58" font-size="15.5" font-weight="800" fill="#0F172A">SQL Analytics Endpoint</text>
+    <line x1="14" y1="70" x2="244" y2="70" stroke="#BFDBFE" stroke-width="1"/>
+    <text x="14" y="90" font-size="12" fill="#334155">&#8226; Validates row counts, null KPIs,</text>
+    <text x="22" y="107" font-size="12" fill="#334155">&amp; Delta metadata parity</text>
+  </g>
+
+  <!-- ================= SWIMLANE 5: SERVING & BI ================= -->
+  <rect x="1253" y="114" width="271" height="682" rx="12" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="1.2"/>
+  <text x="1271" y="142" font-size="12" font-weight="800" fill="#475569" letter-spacing="0.8">5. WAREHOUSE &amp; BI (GATES)</text>
+
+  <!-- ClickHouse Cloud -->
+  <g transform="translate(1269, 210)" filter="url(#card-shadow)">
+    <rect width="239" height="190" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="2" stroke-dasharray="6 4"/>
+    <rect x="14" y="14" width="150" height="22" rx="11" fill="#D97706"/>
+    <text x="89" y="29" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">PRIMARY ENGINE GATE</text>
+    <text x="14" y="58" font-size="16" font-weight="800" fill="#0F172A">ClickHouse Cloud</text>
+    <text x="14" y="78" font-size="12.5" font-weight="600" fill="#92400E">Selected OLAP Warehouse</text>
+    <line x1="14" y1="90" x2="225" y2="90" stroke="#FDE68A" stroke-width="1"/>
+    <text x="14" y="110" font-size="12" fill="#334155">&#8226; Direct Iceberg read (ADLS)</text>
+    <text x="14" y="129" font-size="12" fill="#334155">&#8226; Selective MergeTree only if</text>
+    <text x="22" y="146" font-size="12" fill="#334155">benchmark proves benefit</text>
+    <text x="14" y="168" font-size="12" fill="#334155">&#8226; Optional dbt-clickhouse marts</text>
+  </g>
+
+  <!-- Power BI -->
+  <g transform="translate(1269, 434)" filter="url(#card-shadow)">
+    <rect width="239" height="156" rx="10" fill="#FFFBEB" stroke="#D97706" stroke-width="2" stroke-dasharray="6 4"/>
+    <rect x="14" y="14" width="130" height="22" rx="11" fill="#D97706"/>
+    <text x="79" y="29" font-size="11" font-weight="700" fill="#FFFFFF" text-anchor="middle">BI TARGET GATE</text>
+    <text x="14" y="58" font-size="16" font-weight="800" fill="#0F172A">Power BI Dashboards</text>
+    <line x1="14" y1="70" x2="225" y2="70" stroke="#FDE68A" stroke-width="1"/>
+    <text x="14" y="90" font-size="12" fill="#334155">&#8226; Selected BI presentation layer</text>
+    <text x="14" y="109" font-size="12" fill="#334155">&#8226; DirectLake / ClickHouse</text>
+    <text x="22" y="126" font-size="12" fill="#334155">connectivity gate to validate</text>
+  </g>
+
+  <!-- Excluded / Deferred Notice -->
+  <g transform="translate(1269, 616)">
+    <rect width="239" height="132" rx="10" fill="#F1F5F9" stroke="#94A3B8" stroke-width="1.5"/>
+    <text x="14" y="28" font-size="13" font-weight="800" fill="#334155">Scope Boundaries</text>
+    <line x1="14" y1="38" x2="225" y2="38" stroke="#CBD5E1" stroke-width="1"/>
+    <text x="14" y="58" font-size="12" fill="#475569">&#8226; Excluded MVP: Fabric WH, Trino</text>
+    <text x="14" y="78" font-size="12" fill="#475569">&#8226; Deferred: Flink, Airflow, DataHub</text>
+    <text x="14" y="98" font-size="12" fill="#475569">&#8226; Rule: Never mirror full medallion</text>
+    <text x="22" y="115" font-size="12" fill="#475569">lakehouse into OneLake</text>
+  </g>
+
+  <!-- ================= ARROWS / CONNECTIONS ================= -->
+  <!-- SQL -> Gateway -->
+  <path d="M 295 253 L 348 253" fill="none" stroke="#0F766E" stroke-width="2.5" marker-end="url(#arrow-teal)"/>
+  <!-- MongoDB -> Gateway -->
+  <path d="M 295 450 C 325 450, 325 292, 348 292" fill="none" stroke="#0F766E" stroke-width="2.5" marker-end="url(#arrow-teal)"/>
+  <!-- Gateway -> Pipeline -->
+  <path d="M 471 346 L 471 369" fill="none" stroke="#0F766E" stroke-width="2.5" marker-end="url(#arrow-teal)"/>
+  <!-- Simulator -> Eventstream -->
+  <path d="M 295 676 L 348 676" fill="none" stroke="#B45309" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow-amber)"/>
+  <!-- Pipeline -> Bronze ADLS -->
+  <path d="M 588 430 L 641 393" fill="none" stroke="#0F766E" stroke-width="2.5" marker-end="url(#arrow-teal)"/>
+  <!-- Bronze -> OneLake Shortcut -->
+  <path d="M 891 365 C 920 365, 920 230, 944 230" fill="none" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+  <!-- Shortcut -> Silver -->
+  <path d="M 1080 296 L 1080 311" fill="none" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+  <!-- Silver -> SQL Endpoint -->
+  <path d="M 1080 564 L 1080 579" fill="none" stroke="#1D4ED8" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+  <!-- Silver -> Gold (Next) -->
+  <path d="M 951 482 C 922 482, 922 572, 898 572" fill="none" stroke="#B45309" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow-amber)"/>
+  <!-- Gold -> ClickHouse -->
+  <path d="M 891 594 C 1070 594, 1225 305, 1262 305" fill="none" stroke="#B45309" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#arrow-amber)"/>
+  <!-- ClickHouse -> Power BI -->
+  <path d="M 1388 400 L 1388 427" fill="none" stroke="#B45309" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow-amber)"/>
+  <!-- SQL Endpoint -> Power BI -->
+  <path d="M 1209 647 C 1236 647, 1236 512, 1262 512" fill="none" stroke="#B45309" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow-amber)"/>
+
+  <!-- Footer Metadata -->
+  <text x="40" y="838" font-size="12" font-weight="600" fill="#64748B">Verified State as of 2026-11-24 | Sources: 10 SQL Server + 1 MongoDB (TLS) | Bronze: 11 Landed | Silver: 10 Ready + 1 Draft | Next: Gold &amp; ClickHouse Benchmark</text>
+</svg>
