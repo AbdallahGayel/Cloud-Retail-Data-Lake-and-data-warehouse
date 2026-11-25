@@ -14,9 +14,9 @@ An enterprise-inspired **Hybrid Retail Data Lakehouse** built on **Azure Data La
 
 ## Architecture Overview
 
-![Hybrid Retail Lakehouse Architecture](docs/architecture/diagrams/hybrid_lakehouse_architecture.png)
+![Retail Lakehouse Hybrid Architecture](docs/architecture/diagrams/Retail_Lakehouse_Hybrid_Architecture_Visual.png)
 
-- Editable source diagrams: [`hybrid_lakehouse_architecture.svg`](docs/architecture/diagrams/hybrid_lakehouse_architecture.svg) · [`HYBRID_TARGET_ARCHITECTURE.mmd`](docs/architecture/diagrams/HYBRID_TARGET_ARCHITECTURE.mmd)
+- Detailed technical swimlane diagram: [`hybrid_lakehouse_architecture.png`](docs/architecture/diagrams/hybrid_lakehouse_architecture.png) · Editable sources: [`hybrid_lakehouse_architecture.svg`](docs/architecture/diagrams/hybrid_lakehouse_architecture.svg) · [`HYBRID_TARGET_ARCHITECTURE.mmd`](docs/architecture/diagrams/HYBRID_TARGET_ARCHITECTURE.mmd)
 - Architecture baseline & ADRs: [`ARCHITECTURE_BASELINE.md`](docs/architecture/ARCHITECTURE_BASELINE.md) · [`DECISION_PRECEDENCE.md`](docs/architecture/DECISION_PRECEDENCE.md) · [`docs/decisions/`](docs/decisions/)
 - Preserved legacy planning artifacts (7 Nov 2026): [`LEGACY_README_2026-11-07.md`](docs/reference/LEGACY_README_2026-11-07.md) · [`Blueprint_Digram.png`](docs/Blueprint_Digram.png) · [`Cloud Retail Data Lakehouse Architecture.png`](docs/Cloud%20Retail%20Data%20Lakehouse%20Architecture.png)
 
