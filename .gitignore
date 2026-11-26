@@ -2,6 +2,7 @@
 readonly_assessment/
 Reconcilation/
 *.html
+!docs/portal/*.html
 
 # Local assistant & governance files (kept locally on disk only)
 .agents/
