@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>خريطة الإنجاز والمعمارية الحية — منصة Retail Lakehouse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --canvas: #F6F4EF;
+    --surface: #FFFFFF;
+    --surface-alt: #EFECE5;
+    --ink: #111827;
+    --ink-soft: #475569;
+    --ink-muted: #64748B;
+    --line: #DBD7CD;
+    --line-strong: #C2BCB0;
+    --cobalt: #0369A1;
+    --cobalt-soft: rgba(3, 105, 161, 0.10);
+    --emerald: #0F766E;
+    --emerald-soft: rgba(15, 118, 110, 0.11);
+    --amber: #B45309;
+    --amber-soft: rgba(180, 83, 9, 0.11);
+    --crimson: #B91C1C;
+    --crimson-soft: rgba(185, 28, 28, 0.10);
+    --shadow-sm: 0 2px 10px rgba(17, 24, 39, 0.05);
+    --dot-color: rgba(17, 24, 39, 0.08);
+  }
+
+  html[data-theme="dark"] {
+    --canvas: #0B101B;
+    --surface: #121A2B;
+    --surface-alt: #182238;
+    --ink: #F1F5F9;
+    --ink-soft: #CBD5E1;
+    --ink-muted: #94A3B8;
+    --line: #23304A;
+    --line-strong: #334569;
+    --cobalt: #38BDF8;
+    --cobalt-soft: rgba(56, 189, 248, 0.14);
+    --emerald: #2DD4BF;
+    --emerald-soft: rgba(45, 212, 191, 0.13);
+    --amber: #FBBF24;
+    --amber-soft: rgba(251, 191, 36, 0.13);
+    --crimson: #F87171;
+    --crimson-soft: rgba(248, 113, 113, 0.14);
+    --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.30);
+    --dot-color: rgba(148, 163, 184, 0.12);
+  }
+
+  * { box-sizing: border-box; }
+  svg { direction: ltr; unicode-bidi: isolate; }
+  svg text { direction: ltr; unicode-bidi: embed; }
+  html { scroll-behavior: smooth; }
+  ::selection { background: var(--cobalt); color: #FFFFFF; }
+  ::-webkit-scrollbar { width: 9px; height: 9px; }
+  ::-webkit-scrollbar-track { background: var(--canvas); }
+  ::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--cobalt); }
+
+  body {
+    margin: 0;
+    background-color: var(--canvas);
+    background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
+    background-size: 22px 22px;
+    color: var(--ink);
+    font-family: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+    line-height: 1.75;
+    font-variant-numeric: tabular-nums;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--cobalt);
+    outline-offset: 2px;
+  }
+
+  .mono {
+    font-family: "IBM Plex Mono", Consolas, monospace;
+    direction: ltr;
+    unicode-bidi: embed;
+    display: inline-block;
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-inner {
+    max-width: 1340px;
+    margin: 0 auto;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--ink);
+  }
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: var(--cobalt);
+    color: #fff;
+    display: grid;
+    place-items: center;
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .nav-link {
+    text-decoration: none;
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 7px 12px;
+    border-radius: 8px;
+    transition: background 0.16s ease, color 0.16s ease;
+  }
+  .nav-link:hover { background: var(--surface-alt); color: var(--ink); }
+  .controls-bar { display: flex; align-items: center; gap: 8px; }
+  .btn {
+    cursor: pointer;
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    color: var(--ink);
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn:hover { border-color: var(--cobalt); color: var(--cobalt); transform: translateY(-1px); }
+  .btn-primary {
+    background: var(--cobalt);
+    border-color: var(--cobalt);
+    color: #FFFFFF;
+  }
+  .btn-primary:hover {
+    background: color-mix(in srgb, var(--cobalt) 88%, #000);
+    color: #FFFFFF;
+  }
+
+  .page {
+    max-width: 1340px;
+    margin: 0 auto;
+    padding: 36px 24px 80px;
+  }
+
+  .hero {
+    display: grid;
+    grid-template-columns: 1.45fr 1fr;
+    gap: 28px;
+    align-items: end;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 40px;
+  }
+  @media (max-width: 960px) {
+    .hero { grid-template-columns: 1fr; }
+  }
+  .hero h1 {
+    margin: 0 0 14px;
+    font-size: clamp(1.9rem, 3.2vw, 2.7rem);
+    line-height: 1.25;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+  .hero-lead {
+    margin: 0;
+    max-width: 66ch;
+    color: var(--ink-soft);
+    font-size: 1.02rem;
+  }
+  .telemetry-strip {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px 22px;
+    box-shadow: var(--shadow-sm);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px 20px;
+  }
+  .tel-item { display: flex; flex-direction: column; gap: 2px; }
+  .tel-val { font-size: 1.55rem; font-weight: 700; color: var(--ink); line-height: 1.2; }
+  .tel-lbl { font-size: 0.82rem; color: var(--ink-muted); }
+  .progress-track {
+    grid-column: 1 / -1;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+  }
+  .progress-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.83rem;
+    font-weight: 600;
+    margin-bottom: 7px;
+  }
+  .bar-bg { height: 8px; border-radius: 999px; background: var(--surface-alt); overflow: hidden; }
+  .bar-fill { height: 100%; width: 91%; border-radius: 999px; background: var(--emerald); }
+
+  .sec-block { margin-top: 52px; }
+  .sec-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .sec-head h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+  .sec-desc {
+    margin: 6px 0 0;
+    color: var(--ink-soft);
+    font-size: 0.94rem;
+    max-width: 70ch;
+  }
+
+  .arch-grid {
+    display: grid;
+    grid-template-columns: 1.65fr 1fr;
+    gap: 20px;
+    align-items: stretch;
+  }
+  @media (max-width: 1050px) {
+    .arch-grid { grid-template-columns: 1fr; }
+  }
+  .canvas-panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: var(--shadow-sm);
+    overflow-x: auto;
+  }
+  .arch-svg {
+    width: 100%;
+    min-width: 680px;
+    height: auto;
+    display: block;
+    direction: ltr;
+  }
+  .node-g { cursor: pointer; }
+  .node-rect {
+    fill: var(--surface);
+    stroke: var(--line-strong);
+    stroke-width: 1.6;
+    transition: stroke 0.2s ease, fill 0.2s ease;
+  }
+  .node-g:hover .node-rect { stroke: var(--cobalt); }
+  .node-g.active .node-rect {
+    stroke: var(--cobalt);
+    stroke-width: 2.5;
+    fill: var(--cobalt-soft);
+  }
+  .node-title { fill: var(--ink); font-size: 13px; font-weight: 700; font-family: "IBM Plex Sans Arabic", sans-serif; }
+  .node-sub { fill: var(--ink-muted); font-size: 10.5px; font-family: "IBM Plex Mono", monospace; }
+  .flow-edge {
+    fill: none;
+    stroke: var(--line-strong);
+    stroke-width: 2;
+    stroke-linecap: round;
+    transition: stroke 0.25s ease, stroke-width 0.25s ease;
+  }
+  .flow-edge.lit { stroke: var(--cobalt); stroke-width: 2.8; }
+  .flow-pulse {
+    fill: none;
+    stroke: var(--emerald);
+    stroke-width: 3;
+    stroke-dasharray: 8 18;
+    stroke-linecap: round;
+    opacity: 0;
+  }
+  .simulating .flow-pulse {
+    opacity: 1;
+    animation: flowDash 1.4s linear infinite;
+  }
+  @keyframes flowDash {
+    from { stroke-dashoffset: 52; }
+    to { stroke-dashoffset: 0; }
+  }
+
+  .inspector-panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    width: fit-content;
+  }
+  .b-done { background: var(--emerald-soft); color: var(--emerald); }
+  .b-active { background: var(--cobalt-soft); color: var(--cobalt); }
+  .b-pending { background: var(--amber-soft); color: var(--amber); }
+
+  .inspector-title { margin: 8px 0 4px; font-size: 1.25rem; font-weight: 700; color: var(--ink); }
+  .inspector-sub { margin: 0 0 14px; font-size: 0.85rem; color: var(--ink-muted); }
+  .metric-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .mpill {
+    background: var(--surface-alt);
+    border: 1px solid var(--line);
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .inspector-body { margin: 0; color: var(--ink-soft); font-size: 0.94rem; }
+
+  .journey-layout {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 960px) {
+    .journey-layout { grid-template-columns: 1fr; }
+  }
+  .stepper-list {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 10px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .step-item {
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--ink);
+    text-align: right;
+    padding: 11px 12px;
+    border-radius: 10px;
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    font-family: inherit;
+    overflow: hidden;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .step-item > span:nth-child(2) { min-width: 0; overflow-wrap: anywhere; }
+  .step-item .badge { white-space: nowrap; flex-shrink: 0; }
+  .step-item:hover { background: var(--surface-alt); }
+  .step-item.active { background: var(--cobalt-soft); border-color: var(--cobalt); }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    background: var(--emerald-soft);
+    color: var(--emerald);
+  }
+  .step-item.is-active-stage .step-num { background: var(--amber-soft); color: var(--amber); }
+  .step-item.active .step-num { background: var(--cobalt); color: #fff; }
+  .step-name { font-size: 0.88rem; font-weight: 600; line-height: 1.35; overflow-wrap: anywhere; }
+  .step-phase { font-size: 0.74rem; color: var(--ink-muted); display: block; }
+
+  .milestone-detail {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: var(--shadow-sm);
+    min-height: 480px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  .md-top { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .md-title { margin: 12px 0 8px; font-size: 1.42rem; font-weight: 700; color: var(--ink); }
+  .md-summary { margin: 0 0 20px; color: var(--ink-soft); font-size: 0.98rem; max-width: 68ch; }
+  .md-cols { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+  @media (max-width: 720px) { .md-cols { grid-template-columns: 1fr; } }
+  .md-box {
+    background: var(--surface-alt);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .md-box h4 { margin: 0 0 10px; font-size: 0.9rem; font-weight: 700; color: var(--ink); }
+  .md-box ul { margin: 0; padding: 0 18px 0 0; color: var(--ink-soft); font-size: 0.88rem; }
+  .md-box li { margin-bottom: 6px; }
+  .proof-strip {
+    background: var(--emerald-soft);
+    border: 1px solid color-mix(in srgb, var(--emerald) 35%, transparent);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .md-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+
+  .matrix-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .fpill {
+    cursor: pointer;
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    color: var(--ink-soft);
+    padding: 6px 13px;
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 0.83rem;
+    font-weight: 600;
+    transition: all 0.15s ease;
+  }
+  .fpill:hover { border-color: var(--cobalt); color: var(--ink); }
+  .fpill.active { background: var(--cobalt); border-color: var(--cobalt); color: #fff; }
+  .search-input {
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
+    padding: 8px 14px;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 0.88rem;
+    min-width: 240px;
+  }
+  .search-input::placeholder { color: var(--ink-muted); }
+
+  .matrix-wrap {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .matrix-scroll { overflow-x: auto; }
+  table.matrix { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  table.matrix th {
+    background: var(--surface-alt);
+    color: var(--ink-soft);
+    font-weight: 700;
+    text-align: right;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  table.matrix td {
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  table.matrix tr:last-child td { border-bottom: none; }
+  table.matrix tr:hover td { background: color-mix(in srgb, var(--surface-alt) 55%, transparent); }
+
+  .roadmap-rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  @media (max-width: 900px) { .roadmap-rail { grid-template-columns: 1fr; } }
+  .road-step {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .road-step.is-now {
+    border-color: var(--amber);
+    background: linear-gradient(180deg, var(--amber-soft), var(--surface) 45%);
+  }
+  .road-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .road-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: grid; place-items: center;
+    background: var(--surface-alt); border: 1px solid var(--line); color: var(--cobalt);
+    flex-shrink: 0;
+  }
+  .road-step h3 { margin: 0; font-size: 1.06rem; color: var(--ink); }
+  .road-step p { margin: 0; font-size: 0.89rem; color: var(--ink-soft); }
+  .road-list { margin: 4px 0 0; padding-right: 18px; font-size: 0.85rem; color: var(--ink-soft); display: grid; gap: 4px; }
+
+  /* Infographics & Visual Showcase */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 20px;
+    align-items: stretch;
+  }
+  @media (max-width: 1020px) { .info-grid { grid-template-columns: 1fr; } }
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .info-card-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .info-card-head h3 { margin: 0; font-size: 1.06rem; color: var(--ink); }
+  .stage-rail {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    align-items: stretch;
+  }
+  @media (max-width: 720px) { .stage-rail { grid-template-columns: 1fr 1fr; } }
+  .stage-pill-card {
+    background: var(--surface-alt);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .stage-pill-card.is-done { border-color: var(--emerald); background: var(--emerald-soft); }
+  .stage-pill-card.is-here {
+    border: 2px solid var(--amber);
+    background: var(--amber-soft);
+    box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.10);
+  }
+  .stage-pill-card .s-title { font-weight: 700; font-size: 0.86rem; color: var(--ink); }
+  .stage-pill-card .s-meta { font-size: 0.77rem; color: var(--ink-soft); line-height: 1.45; }
+  .donut-row {
+    display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    padding-top: 8px; border-top: 1px dashed var(--line);
+  }
+  .donut-legend { display: grid; gap: 6px; font-size: 0.85rem; color: var(--ink-soft); flex: 1; min-width: 210px; }
+  .dl-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .dl-dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; margin-left: 7px; }
+
+  .visual-poster-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 20px;
+  }
+  .visual-poster-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .visual-poster-img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    display: block;
+    cursor: zoom-in;
+  }
+  .lightbox {
+    position: fixed; inset: 0; z-index: 999;
+    background: rgba(8, 15, 29, 0.90);
+    display: none; align-items: center; justify-content: center; padding: 24px;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 96vw; max-height: 92vh; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); }
+  .lightbox-close {
+    position: fixed; top: 18px; left: 24px;
+    background: #FFFFFF; color: #0F172A; border: none; border-radius: 999px;
+    padding: 8px 14px; font-weight: 700; cursor: pointer;
+  }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 0.83rem;
+    color: var(--ink-muted);
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+          <path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"></path>
+        </svg>
+      </div>
+      <span>Retail Lakehouse Platform</span>
+    </div>
+    <nav class="nav-links" aria-label="التنقل الرئيسي">
+      <a class="nav-link" href="#infographics">أين نقف الآن</a>
+      <a class="nav-link" href="#architecture">المعمارية</a>
+      <a class="nav-link" href="#journey">رحلة الـ 11 مرحلة</a>
+      <a class="nav-link" href="#silver-matrix">مصفوفة Silver (11)</a>
+      <a class="nav-link" href="#roadmap">الخطوة الجاية</a>
+    </nav>
+    <div class="controls-bar">
+      <a class="btn" href="Business_and_Gold_Blueprint_AR.html" title="فهم البيزنس وتصميم طبقة Gold">دليل البيزنس وGold</a>
+      <a class="btn" href="Project_Journey_Status_EN.html" title="Switch to English Edition">English</a>
+      <button class="btn btn-primary" id="btnPulse" onclick="togglePulse()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        <span id="pulseLabel">تشغيل محاكاة التدفق</span>
+      </button>
+      <button class="btn" id="btnTheme" onclick="toggleTheme()" aria-label="تبديل المظهر">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>
+        <span id="themeLabel">وضع ليلي</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+
+  <section class="hero" aria-label="ملخص حالة المشروع">
+    <div>
+      <h1>خريطة الإنجاز والمعمارية الحية لمنصة <span class="mono">Retail Lakehouse</span></h1>
+      <p class="hero-lead">
+        توثيق تفاعلي كامل لمسيرة البناء خطوة بخطوة: من تأسيس قواعد بيانات <strong>SQL Server</strong> و<strong>MongoDB 8.3 (TLS)</strong>، مروراً بـ <strong>Azure ADLS Gen2</strong> و<strong>OneLake Shortcuts</strong> و<strong>On-Premises Data Gateway</strong> وبايب لاين النقل الموحّد، وصولاً إلى تحويلات <strong>Delta Lake Silver</strong> عالية الجودة.
+      </p>
+    </div>
+    <div class="telemetry-strip">
+      <div class="tel-item">
+        <span class="tel-val">10 / 11</span>
+        <span class="tel-lbl">مراحل الرحلة المكتملة (تم رفع الريبو)</span>
+      </div>
+      <div class="tel-item">
+        <span class="tel-val">9 / 11</span>
+        <span class="tel-lbl">جداول Silver جاهزة · المتبقّي: orders و order_payments</span>
+      </div>
+      <div class="tel-item">
+        <span class="tel-val">1,659,655</span>
+        <span class="tel-lbl">إجمالي السجلات المنقولة إلى ADLS Bronze</span>
+      </div>
+      <div class="tel-item">
+        <span class="tel-val">0 Orphans</span>
+        <span class="tel-lbl">تطابق المرجعيات والمجاميع المالية</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-head">
+          <span>جاهزية طبقة Silver (9/11 جاهز · متبقّي مراجعة orders و order_payments)</span>
+          <span class="mono">82%</span>
+        </div>
+        <div class="bar-bg"><div class="bar-fill" style="width:82%;"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec-block" id="infographics">
+    <div class="sec-head">
+      <div>
+        <h2>إنفوجرافيك التقدّم الفعلي وحجم البيانات</h2>
+        <p class="sec-desc">نظرة بصرية سريعة توضح أين نقف الآن في خطة التنفيذ، وتوزيع الـ 1.66 مليون سجل على الجداول الـ 11، وما تبقّى لإغلاق طبقة Silver.</p>
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-card-head">
+          <h3>أين نقف الآن في رحلة الـ Lakehouse</h3>
+          <span class="badge b-pending">التركيز الحالي: مراجعة 2 جدول Silver</span>
+        </div>
+        <div class="stage-rail">
+          <div class="stage-pill-card is-done">
+            <span class="badge b-done">100% مكتمل</span>
+            <div class="s-title">1. المصادر والبوابة</div>
+            <div class="s-meta">SQL Server (10) + MongoDB 8.3 (TLS) + Gateway-01</div>
+          </div>
+          <div class="stage-pill-card is-done">
+            <span class="badge b-done">100% مكتمل</span>
+            <div class="s-title">2. ADLS Gen2 Bronze</div>
+            <div class="s-meta">نقل 11/11 مصدراً (Parquet + JSON) + OneLake Shortcuts</div>
+          </div>
+          <div class="stage-pill-card is-here">
+            <span class="badge b-pending">نحن هنا الآن</span>
+            <div class="s-title">3. Silver وتحديث الريبو</div>
+            <div class="s-meta">تم رفع الريبو (6237750) · 9/11 جاهز · متبقّي <strong>orders</strong> و <strong>order_payments</strong></div>
+          </div>
+          <div class="stage-pill-card">
+            <span class="badge b-active">المرحلة القادمة</span>
+            <div class="s-title">4. Gold والتقديم</div>
+            <div class="s-meta">نموذج النجمة Iceberg + ClickHouse Cloud + Power BI</div>
+          </div>
+        </div>
+
+        <div class="donut-row">
+          <svg width="118" height="118" viewBox="0 0 120 120" role="img" aria-label="اكتمال طبقة Silver 9 من 11 جدولاً">
+            <circle cx="60" cy="60" r="46" fill="none" stroke="var(--surface-alt)" stroke-width="14"></circle>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="var(--emerald)" stroke-width="14" stroke-dasharray="210 289" stroke-dashoffset="0" transform="rotate(-90 60 60)"></circle>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="var(--cobalt)" stroke-width="14" stroke-dasharray="26 289" stroke-dashoffset="-210" transform="rotate(-90 60 60)"></circle>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="var(--amber)" stroke-width="14" stroke-dasharray="53 289" stroke-dashoffset="-236" transform="rotate(-90 60 60)"></circle>
+            <text x="60" y="57" text-anchor="middle" font-size="20" font-weight="700" fill="var(--ink)">9/11</text>
+            <text x="60" y="74" text-anchor="middle" font-size="11" font-weight="600" fill="var(--ink-muted)">82% جاهز</text>
+          </svg>
+          <div class="donut-legend">
+            <div class="dl-item"><span><span class="dl-dot" style="background:var(--emerald);"></span>معتمد في Silver (SQL Server)</span><strong class="mono">8 جداول</strong></div>
+            <div class="dl-item"><span><span class="dl-dot" style="background:var(--cobalt);"></span>جاهز للتشغيل في Fabric (MongoDB)</span><strong class="mono">1 جدول (order_reviews)</strong></div>
+            <div class="dl-item"><span><span class="dl-dot" style="background:var(--amber);"></span>متبقّي للمراجعة والترقية</span><strong class="mono">2 جدول (orders, order_payments)</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-head">
+          <h3>خريطة أحجام البيانات والحالة للـ 11 جدولاً</h3>
+          <span class="badge b-active">1,659,655 إجمالي السجلات</span>
+        </div>
+        <svg viewBox="0 0 540 315" width="100%" dir="ltr" style="direction:ltr;" role="img" aria-label="رسم بياني أفقي لأحجام وحالات الـ 11 جدولاً">
+          <g font-family="IBM Plex Sans, Segoe UI, sans-serif" font-size="11" text-anchor="start">
+            <text x="4" y="18" fill="var(--ink)" font-weight="600">dim_geolocation</text>
+            <rect x="155" y="7" width="250" height="14" rx="4" fill="var(--emerald)"></rect>
+            <text x="413" y="18" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">1,000,163 -> 19k</text>
+
+            <text x="4" y="45" fill="var(--ink)" font-weight="600">order_items</text>
+            <rect x="155" y="34" width="168" height="14" rx="4" fill="var(--emerald)"></rect>
+            <text x="331" y="45" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">112,650 (Done)</text>
+
+            <text x="4" y="72" fill="var(--amber)" font-weight="700">order_payments *</text>
+            <rect x="155" y="61" width="160" height="14" rx="4" fill="var(--amber)"></rect>
+            <text x="323" y="72" fill="var(--amber)" font-weight="700" font-family="IBM Plex Mono, monospace">103,886 (Review)</text>
+
+            <text x="4" y="99" fill="var(--amber)" font-weight="700">orders *</text>
+            <rect x="155" y="88" width="154" height="14" rx="4" fill="var(--amber)"></rect>
+            <text x="317" y="99" fill="var(--amber)" font-weight="700" font-family="IBM Plex Mono, monospace">99,441 (Review)</text>
+
+            <text x="4" y="126" fill="var(--ink)" font-weight="600">customers</text>
+            <rect x="155" y="115" width="154" height="14" rx="4" fill="var(--emerald)"></rect>
+            <text x="317" y="126" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">99,441 (Done)</text>
+
+            <text x="4" y="153" fill="var(--cobalt)" font-weight="700">order_reviews (Mongo)</text>
+            <rect x="155" y="142" width="153" height="14" rx="4" fill="var(--cobalt)"></rect>
+            <text x="316" y="153" fill="var(--cobalt)" font-weight="700" font-family="IBM Plex Mono, monospace">99,224 (Ready)</text>
+
+            <text x="4" y="180" fill="var(--ink)" font-weight="600">products</text>
+            <rect x="155" y="169" width="102" height="14" rx="4" fill="var(--emerald)"></rect>
+            <text x="265" y="180" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">32,951 (Done)</text>
+
+            <text x="4" y="207" fill="var(--ink)" font-weight="600">marketing_leads (MQL)</text>
+            <rect x="155" y="196" width="60" height="14" rx="4" fill="var(--emerald)"></rect>
+            <text x="223" y="207" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">8,000 (Done)</text>
+
+            <text x="4" y="234" fill="var(--ink)" font-weight="600">sellers</text>
+            <rect x="155" y="223" width="42" height="14" rx="4" fill="var(--emerald)"></rect>
+            <text x="205" y="234" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">3,095 (Done)</text>
+
+            <text x="4" y="261" fill="var(--ink)" font-weight="600">closed_deals</text>
+            <rect x="155" y="250" width="24" height="14" rx="4" fill="var(--emerald)"></rect>
+            <text x="187" y="261" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">842 (Done)</text>
+
+            <text x="4" y="288" fill="var(--ink)" font-weight="600">category_translation</text>
+            <rect x="155" y="277" width="12" height="14" rx="4" fill="var(--emerald)"></rect>
+            <text x="175" y="288" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">71 (Done)</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec-block" id="architecture">
+    <div class="sec-head">
+      <div>
+        <h2>المخطط البصري والمعمارية التفاعلية لتدفق البيانات</h2>
+        <p class="sec-desc">شاهد البوستر المعماري المحدّث (اضغط للتكبير بملء الشاشة)، أو اضغط على أي عقدة في المخطط التفاعلي أسفله لعرض إعداداتها وتشغيل محاكاة التدفق.</p>
+      </div>
+    </div>
+
+    <div class="visual-poster-card">
+      <div class="visual-poster-head">
+        <div>
+          <strong style="color:var(--ink);">الصورة المعمارية المعتمدة (مدمجة في <span class="mono">README.md</span>)</strong>
+          <div style="font-size:0.83rem;color:var(--ink-muted);">تُظهر توحيد SQL Server (10 جداول) ومسار MongoDB 8.3 TLS عبر البايب لاين إلى ADLS Gen2 Bronze ثم OneLake Shortcuts وSpark Silver.</div>
+        </div>
+        <button class="btn btn-primary" onclick="openLightbox()">تكبير الصورة</button>
+      </div>
+      <img class="visual-poster-img" src="../docs/architecture/diagrams/Retail_Lakehouse_Hybrid_Architecture_Visual.png" alt="المخطط المعماري البصري لمنصة Retail Lakehouse" onclick="openLightbox()" />
+    </div>
+
+    <div class="arch-grid">
+      <div class="canvas-panel" id="archCanvasWrap">
+        <svg class="arch-svg" viewBox="0 0 880 370" role="img" aria-label="مخطط معمارية منصة Retail Lakehouse">
+          <path id="e-sql-gw" class="flow-edge" d="M 190 95 L 255 95 L 255 165 L 285 165" />
+          <path id="e-mongo-gw" class="flow-edge" d="M 190 245 L 255 245 L 255 190 L 285 190" />
+          <path id="e-gw-pl" class="flow-edge" d="M 435 178 L 475 178" />
+          <path id="e-pl-adls" class="flow-edge" d="M 630 178 L 665 178 L 665 95 L 690 95" />
+          <path id="e-adls-sc" class="flow-edge" d="M 780 140 L 780 170" />
+          <path id="e-sc-sil" class="flow-edge" d="M 780 230 L 780 265" />
+          <path id="e-sil-gold" class="flow-edge" d="M 690 308 L 570 308" />
+
+          <path class="flow-pulse" d="M 190 95 L 255 95 L 255 165 L 285 165" />
+          <path class="flow-pulse" d="M 190 245 L 255 245 L 255 190 L 285 190" />
+          <path class="flow-pulse" d="M 435 178 L 475 178" />
+          <path class="flow-pulse" d="M 630 178 L 665 178 L 665 95 L 690 95" />
+          <path class="flow-pulse" d="M 780 140 L 780 170" />
+          <path class="flow-pulse" d="M 780 230 L 780 265" />
+          <path class="flow-pulse" d="M 690 308 L 570 308" />
+
+          <g class="node-g active" data-node="sqlserver" onclick="selectNode('sqlserver')">
+            <rect class="node-rect" x="15" y="55" width="175" height="80" rx="12"></rect>
+            <text class="node-title" x="30" y="84">SQL Server (Local)</text>
+            <text class="node-sub" x="30" y="103">10 dbo Tables</text>
+            <text class="node-sub" x="30" y="120">Olist + Marketing</text>
+          </g>
+
+          <g class="node-g" data-node="mongodb" onclick="selectNode('mongodb')">
+            <rect class="node-rect" x="15" y="205" width="175" height="80" rx="12"></rect>
+            <text class="node-title" x="30" y="234">MongoDB 8.3 (TLS)</text>
+            <text class="node-sub" x="30" y="253">retail_reviews</text>
+            <text class="node-sub" x="30" y="270">99,224 BSON Docs</text>
+          </g>
+
+          <g class="node-g" data-node="gateway" onclick="selectNode('gateway')">
+            <rect class="node-rect" x="285" y="135" width="150" height="86" rx="12"></rect>
+            <text class="node-title" x="300" y="164">Data Gateway</text>
+            <text class="node-sub" x="300" y="183">On-Premises</text>
+            <text class="node-sub" x="300" y="200">TLS + SCRAM-256</text>
+          </g>
+
+          <g class="node-g" data-node="pipeline" onclick="selectNode('pipeline')">
+            <rect class="node-rect" x="475" y="135" width="155" height="86" rx="12"></rect>
+            <text class="node-title" x="490" y="164">Fabric Pipeline</text>
+            <text class="node-sub" x="490" y="183">Metadata ForEach</text>
+            <text class="node-sub" x="490" y="200">+ MongoDB Copy</text>
+          </g>
+
+          <g class="node-g" data-node="adls" onclick="selectNode('adls')">
+            <rect class="node-rect" x="690" y="55" width="175" height="85" rx="12"></rect>
+            <text class="node-title" x="705" y="84">Azure ADLS Gen2</text>
+            <text class="node-sub" x="705" y="103">stolistlakehouse01</text>
+            <text class="node-sub" x="705" y="120">bronze/ (6 domains)</text>
+          </g>
+
+          <g class="node-g" data-node="shortcut" onclick="selectNode('shortcut')">
+            <rect class="node-rect" x="690" y="170" width="175" height="60" rx="12"></rect>
+            <text class="node-title" x="705" y="196">OneLake Shortcuts</text>
+            <text class="node-sub" x="705" y="215">Files/bronze/* (0-Copy)</text>
+          </g>
+
+          <g class="node-g" data-node="silver" onclick="selectNode('silver')">
+            <rect class="node-rect" x="690" y="265" width="175" height="86" rx="12"></rect>
+            <text class="node-title" x="705" y="294">Silver Delta Lake</text>
+            <text class="node-sub" x="705" y="313">silver.* (10/11)</text>
+            <text class="node-sub" x="705" y="330">ACID + Quarantine</text>
+          </g>
+
+          <g class="node-g" data-node="gold" onclick="selectNode('gold')">
+            <rect class="node-rect" x="370" y="268" width="200" height="80" rx="12" stroke-dasharray="6 4"></rect>
+            <text class="node-title" x="385" y="296">Gold + ClickHouse + BI</text>
+            <text class="node-sub" x="385" y="315">Next Phase Roadmap</text>
+            <text class="node-sub" x="385" y="332">Star Schema &amp; Serving</text>
+          </g>
+        </svg>
+      </div>
+
+      <aside class="inspector-panel" id="nodeInspector" aria-live="polite">
+        <div>
+          <span class="badge b-active" id="insBadge">المصدر العلائقي</span>
+          <h3 class="inspector-title" id="insTitle">Microsoft SQL Server</h3>
+          <p class="inspector-sub mono" id="insSub">Cloud_Retail_Data_Lakehouse_v2 (10 Tables)</p>
+          <div class="metric-pills" id="insMetrics"></div>
+          <p class="inspector-body" id="insBody"></p>
+        </div>
+        <div style="font-size:0.8rem;color:var(--ink-muted);border-top:1px solid var(--line);padding-top:12px;">
+          تلميح: اضغط على أي عقدة في المخطط المجاور لتفقد مسار البيانات والقرارات الهندسية المرتبطة بها.
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="sec-block" id="journey">
+    <div class="sec-head">
+      <div>
+        <h2>رحلة التنفيذ خطوة بخطوة (11 مرحلة متكاملة)</h2>
+        <p class="sec-desc">اختر أي مرحلة من القائمة الجانبية لاستعراض الموارد المنشأة، القرارات الهندسية، والمشاكل الحقيقية التي تم حلّها وإثباتها.</p>
+      </div>
+    </div>
+
+    <div class="journey-layout">
+      <div class="stepper-list" id="stepperList" role="tablist" aria-label="مراحل تنفيذ المشروع"></div>
+      <article class="milestone-detail" id="milestoneDetail" aria-live="polite"></article>
+    </div>
+  </section>
+
+  <section class="sec-block" id="silver-matrix">
+    <div class="sec-head">
+      <div>
+        <h2>مصفوفة تحويلات طبقة Silver (11 جدولاً عبر مصدرين)</h2>
+        <p class="sec-desc">تتبّع حالة كل جدول، المفتاح الأساسي، النوتبوك المقابلة، وأبرز مشاكل جودة البيانات التي تم اكتشافها وحلّها.</p>
+      </div>
+    </div>
+
+    <div class="matrix-controls">
+      <div class="filter-pills" id="filterPills">
+        <button class="fpill active" data-filter="all" onclick="setTableFilter('all', this)">الكل (11)</button>
+        <button class="fpill" data-filter="done" onclick="setTableFilter('done', this)">معتمد في Silver (8)</button>
+        <button class="fpill" data-filter="ready" onclick="setTableFilter('ready', this)">جاهز للتشغيل (1)</button>
+        <button class="fpill" data-filter="pending" onclick="setTableFilter('pending', this)">بانتظار المراجعة (2)</button>
+        <button class="fpill" data-filter="mongodb" onclick="setTableFilter('mongodb', this)">مصدر MongoDB (1)</button>
+      </div>
+      <input class="search-input" type="search" id="tableSearch" placeholder="ابحث باسم الجدول أو المشكلة..." oninput="renderTableMatrix()">
+    </div>
+
+    <div class="matrix-wrap">
+      <div class="matrix-scroll">
+        <table class="matrix">
+          <thead>
+            <tr>
+              <th>جدول Silver</th>
+              <th>المصدر</th>
+              <th>عدد الصفوف</th>
+              <th>المفتاح (PK)</th>
+              <th>الحالة</th>
+              <th>أبرز المعالجات والجودة</th>
+            </tr>
+          </thead>
+          <tbody id="matrixBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec-block" id="roadmap">
+    <div class="sec-head">
+      <div>
+        <h2>الخطوة الجاية بالتفصيل: إقفال مراجعة <span class="mono">orders</span> و <span class="mono">order_payments</span> &larr; Gold &larr; التقديم</h2>
+        <p class="sec-desc">خطة العمل التنفيذية الدقيقة من الوضع الحالي (9/11 Silver جاهز) حتى بناء نموذج النجمة Gold وربط ClickHouse Cloud وPower BI.</p>
+      </div>
+    </div>
+    <div class="roadmap-rail">
+      <div class="road-step is-now">
+        <div class="road-head">
+          <span class="badge b-pending">الخطوة العاجلة 1</span>
+          <div class="road-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+        </div>
+        <h3>المراجعة النهائية وتشغيل <span class="mono">silver.orders</span> (99,441 صف)</h3>
+        <p>مراجعة واعتماد نوتبوك <code>NB_Silver_Orders.ipynb</code> داخل Fabric مع تشغيل <code>NB_Silver_Order_Reviews_MongoDB.ipynb</code> (99,224 وثيقة).</p>
+        <ul class="road-list">
+          <li>التحقق من بقاء الـ 5 تواريخ بصيغة <code>TIMESTAMP</code> أصلية بدون تحويل لنصوص.</li>
+          <li>تأكيد <code>0 Orphans</code> لـ <code>customer_id</code> مقابل <code>silver.customers</code>.</li>
+          <li>مراجعة أعلام الـ <code>23</code> انقلاباً زمنياً و<code>7,827</code> شحنة متأخرة في SQL Endpoint.</li>
+        </ul>
+      </div>
+
+      <div class="road-step is-now">
+        <div class="road-head">
+          <span class="badge b-pending">الخطوة العاجلة 2</span>
+          <div class="road-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          </div>
+        </div>
+        <h3>فحص وترقية <span class="mono">silver.order_payments</span> (103,886 صف)</h3>
+        <p>فحص ملف الـ CSV الخام وملف Bronze، ثم ترقية <code>NB_Silver_Order_Payments.ipynb</code> من مسودة إلى المعيار الإنتاجي وإصدار تقرير المراجعة.</p>
+        <ul class="road-list">
+          <li>فحص المفتاح المركب <code>(order_id, payment_sequential)</code> وتعدّد وسائل الدفع والأقساط.</li>
+          <li>التسوية المالية الكاملة لإجمالي <code>payment_value</code> مقابل <code>silver.order_items</code> (<code>15,843,553.24</code>).</li>
+          <li>تحديث النوتبوك في <code>notebooks/silver/</code> لإغلاق <strong>11/11 من طبقة Silver</strong>.</li>
+        </ul>
+      </div>
+
+      <div class="road-step">
+        <div class="road-head">
+          <span class="badge b-active">المرحلة 4</span>
+          <div class="road-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+        </div>
+        <h3>بناء نموذج النجمة Gold Star Schema (Iceberg v2)</h3>
+        <p>تصميم جداول الحقائق والأبعاد على ADLS Gen2 مع فصل مستويات الحبيبية (Grain Isolation) بدقة.</p>
+        <ul class="road-list">
+          <li>بناء <code>fact_order_items</code>، <code>fact_orders</code>، <code>fact_payments</code>، و<code>fact_marketing_funnel</code>.</li>
+          <li>بناء <code>fact_reviews_bridge</code> على مستوى <code>order_id</code> لمنع تضاعف الإيرادات (<code>+664</code> صف).</li>
+          <li>تجهيز الأبعاد الموحدة: <code>dim_customer</code>، <code>dim_product</code>، <code>dim_seller</code>، <code>dim_date</code>.</li>
+        </ul>
+      </div>
+
+      <div class="road-step">
+        <div class="road-head">
+          <span class="badge b-done">المرحلة 5</span>
+          <div class="road-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+          </div>
+        </div>
+        <h3>اختبار ClickHouse Cloud وPower BI والدمج في <span class="mono">main</span></h3>
+        <p>التحقّق من بوابات التقديم التحليلي واعتماد النسخة المستقرة من المستودع.</p>
+        <ul class="road-list">
+          <li>قياس أداء ClickHouse Cloud لقراءة Iceberg مباشرة مقابل جداول <code>MergeTree</code> الانتقائية.</li>
+          <li>تقييم <code>dbt-clickhouse</code> (اختياري) وربط نماذج Power BI الدلالية.</li>
+          <li>فتح ودمج Pull Request من <code>feature/hybrid-architecture-baseline</code> إلى <code>main</code>.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Retail Lakehouse Platform — حالة المشروع الموثّقة حتى 25 نوفمبر 2026</span>
+    <span>وثيقة تفاعلية محلية داخل <span class="mono">readonly_assessment/</span> (مستبعدة من النشر في Git)</span>
+  </footer>
+
+</main>
+
+<div class="lightbox" id="imgLightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox(event)">إغلاق &times;</button>
+  <img src="../docs/architecture/diagrams/Retail_Lakehouse_Hybrid_Architecture_Visual.png" alt="المخطط المعماري بملء الشاشة" />
+</div>
+
+<script>
+  const MILESTONES = [{"id": 1, "phase": "طبقة المصادر", "title": "إنشاء الجداول في SQL Server وقاعدة MongoDB", "status": "done", "tag": "مكتمل 100%", "summary": "تأسيس قاعدة البيانات العلائقية Cloud_Retail_Data_Lakehouse_v2 (10 جداول تشمل متجر Olist وقمع التسويق) بجانب قاعدة الوثائق retail_reviews في MongoDB 8.3.", "resources": ["SQL Server: Cloud_Retail_Data_Lakehouse_v2 (10 dbo tables)", "Olist Store (8 tables): customers, orders, order_items, order_payments, products, sellers, product_category_name_translation, dim_geolocation", "Marketing Funnel (2 tables): marketing_qualified_leads, closed_deals", "MongoDB 8.3: retail_reviews.order_reviews (BSON Collection)"], "decisions": ["تحديد المفاتيح الأساسية والمركبة بدقة (مثل PK_closed_deals مع FK إلى MQL، ومنع ربط closed_deals.seller_id بـ dbo.sellers لأن 462 بائعاً جدد لم يبيعوا بعد).", "تثبيت أنواع دقيقة للأعمدة الخادعة مثل average_stock كـ VARCHAR(20) (فئات نصية '20-50') وdeclared_monthly_revenue كـ DECIMAL(14,2)."], "proof": "تم إنشاء الـ 10 جداول في SQL Server والـ Collection في MongoDB بنجاح دون أي تعارض في الـ Schema."}, {"id": 2, "phase": "تغذية المصادر", "title": "التحميل الشامل (Bulk Insert) وتحويل التقييمات إلى Nested BSON", "status": "done", "tag": "1.66M+ سجل", "summary": "تحميل ملفات Olist التاريخية إلى SQL Server عبر BULK INSERT مع جداول Staging ذكية، وتحويل تقييمات العملاء إلى وثائق BSON متداخلة وشبه مهيكلة داخل MongoDB.", "resources": ["سكريبت: readonly_assessment/sql/01_create_and_load_marketing_funnel.sql", "سكريبت: src/ingestion/mongodb_reviews_loader.py (Idempotent InsertOne)", "إجمالي السجلات المحمّلة: 1,000,163 geolocation + 112,650 order_items + 103,886 payments + 99,441 orders + 99,441 customers + 99,224 MongoDB reviews + 32,951 products + 8,000 MQLs + 3,095 sellers + 842 closed_deals + 71 translations"], "decisions": ["معالجة ملفات Marketing Funnel ذات نهاية سطر LF_ONLY باستخدام FORMAT='CSV' وROWTERMINATOR='0x0a' وجدول مؤقت #stg_closed_deals لحل الفواصل المقتبسة ('cat, wolf') وتحويل True/False إلى BIT و'2000.0' إلى INT.", "بناء مفتاح حتمي _id = '{review_id}::{order_id}' في MongoDB مع هيكلة الكائنات المتداخلة comment وtimestamps وsource_lineage وحجر صحي JSONL لأي صف مرفوض."], "proof": "تطابق تام 100%: 8,000 MQLs، 842 Closed Deals (0 Orphans)، و99,224 وثيقة BSON متداخلة في MongoDB بدون تكرار."}, {"id": 3, "phase": "بيئة Fabric", "title": "إنشاء بيئة العمل (Workspace) والـ Lakehouse في Microsoft Fabric", "status": "done", "tag": "Schema-Enabled", "summary": "تجهيز مساحة العمل السحابية dev_env وإنشاء الـ Lakehouse الرئيسي Retail_Analytics_Lakehouse بنظام الـ Schemas لدعم طبقات Medallion (silver / gold) بشكل معزول ومنظم.", "resources": ["Fabric Workspace: dev_env (bbbeef42-0bf9-4767-8e0f-c250ced57331)", "Lakehouse: Retail_Analytics_Lakehouse (017353fb-7f18-412a-b4d5-ee29034ada36)", "Compute Engine: Apache Spark 4.1.1 / Delta Lake 4.2.0 + SQL Analytics Endpoint"], "decisions": ["تفعيل Schema-enabled Lakehouse لفصل جداول silver.* عن الـ default/dbo وتفادي تلوث مساحة الأسماء.", "اعتماد OneLake كطبقة تحليلات مُدارة متكاملة مع SQL Analytics Endpoint للتحقق الفوري دون تشغيل Spark."], "proof": "تم إنشاء الـ Workspace والـ Lakehouse وتفعيل Delta Lake Deletion Vectors وExtended Stats تلقائياً."}, {"id": 4, "phase": "التخزين السحابي", "title": "إنشاء مخزن الكائنات السحابي Azure Data Lake Storage Gen2", "status": "done", "tag": "Canonical Store", "summary": "تجهيز حساب التخزين stolistlakehouse01 على Azure مع تفعيل Hierarchical Namespace (ADLS Gen2) ليكون المصدر الفيزيائي المعتمد (Canonical Physical Store) للبيانات عبر المنصات.", "resources": ["Storage Account: stolistlakehouse01.dfs.core.windows.net", "Protocol: Azure Blob File System Secure (ABFSS / DFS Endpoint)", "Architecture Role: Canonical physical ownership لطبقة Bronze وما يليها"], "decisions": ["فصل طبقة التخزين الفيزيائي في ADLS Gen2 عن محرك الحوسبة في Fabric لضمان حرية القراءة لاحقاً من ClickHouse Cloud دون تكرار البيانات."], "proof": "تم ربط حساب التخزين بنجاح وتأكيد القراءة والكتابة عبر ABFSS من Fabric Pipeline وSpark."}, {"id": 5, "phase": "هيكلة البيانات", "title": "إنشاء الـ File System (Container) وتقسيم مجلدات Bronze حسب الدومين", "status": "done", "tag": "6 Domains", "summary": "تأسيس الحاوية الرئيسية retail-lakehouse وتقسيم طبقة bronze/ إلى 6 مجالات عمل منظمة تمنع اختلاط الجداول وتسهّل الحوكمة والصلاحيات.", "resources": ["Container / File System: retail-lakehouse", "bronze/crm/customers/ · bronze/sales/{orders, order_items, order_payments}/", "bronze/catalog/{products, sellers, product_category_name_translation}/", "bronze/reference/dim_geolocation/ · bronze/marketing/{marketing_qualified_leads, closed_deals}/", "bronze/reviews/order_reviews/ (JSON Lines)"], "decisions": ["اعتماد تسمية ملفات زمنية حتمية {TableName}_{yyyyMMdd_HHmmss}_{RunId}.parquet (و.json لـ MongoDB) لمنع الكتابة الفوقية الصامتة وتسهيل تتبع الـ Lineage."], "proof": "كل الـ 11 كياناً موزعة في مجلداتها القياسية داخل retail-lakehouse/bronze/ بنجاح."}, {"id": 6, "phase": "التكامل الافتراضي", "title": "إنشاء OneLake Shortcuts داخل الـ Lakehouse (Zero-Copy)", "status": "done", "tag": "Zero-Copy", "summary": "ربط مجلد Files/bronze داخل Retail_Analytics_Lakehouse مباشرة بمجلد bronze في ADLS Gen2 عبر OneLake Shortcuts دون نسخ الملفات فعلياً.", "resources": ["Shortcut Path inside Lakehouse: Files/bronze/{domain}/{table}/", "Target: abfss://retail-lakehouse@stolistlakehouse01.dfs.core.windows.net/bronze/"], "decisions": ["استخدام المسارات النسبية (Files/bronze/...) في كل نوتبوكات Silver بدلاً من روابط abfss:// الثابتة بالـ GUIDs، مما يجعل الكود محمولاً وآمناً."], "proof": "كل نوتبوكات PySpark قرأت الـ Shortcuts مباشرة بسرعات Spark الموزعة دون أي نقل إضافي للبيانات."}, {"id": 7, "phase": "الأمان والشبكة", "title": "إعداد On-Premises Data Gateway وتشفير TLS لـ MongoDB وصلاحيات ADLS", "status": "done", "tag": "TLS + RBAC", "summary": "تجهيز بوابة البيانات المحلية Retail-Lakehouse-Gateway-01 للربط الآمن بين قواعد البيانات المحلية وسحابة Fabric، وتفعيل TLS محلي لـ MongoDB 8.3 وضبط صلاحيات RBAC على ADLS.", "resources": ["Gateway Cluster: Retail-Lakehouse-Gateway-01", "MongoDB 8.3 TLS: شهادة X.509 لـ localhost/127.0.0.1 + CAFile + allowConnectionsWithoutCertificates + Windows Trusted Root", "MongoDB Auth: مستخدم قراءة فقط fabric_reader بصلاحية read على retail_reviews (SCRAM-SHA-256)", "ADLS Role Access: Storage Blob Data Contributor + تفعيل 'Allow this connection to be utilized with on-premises data gateways'"], "decisions": ["حل خطأ MongoDB 8.3 (SERVER-72839) بإضافة CAFile وallowConnectionsWithoutCertificates: true تحت net.tls.mode: preferTLS.", "حل فشل SCRAM-SHA-256 بتوحيد مستخدم fabric_reader في admin وretail_reviews بكلمة مرور خالية من رموز كسر الـ URI (@ و$)."], "proof": "نجح Test Connection بالعلامة الخضراء لكل من SQL Server وMongoDB 8.3 وADLS Gen2 عبر نفس البوابة."}, {"id": 8, "phase": "الربط السحابي", "title": "تفعيل واعتماد الاتصالات والبوابات داخل Microsoft Fabric", "status": "done", "tag": "3 Connections", "summary": "تسجيل وتوثيق الاتصالات الثلاثة داخل Manage Connections and Gateways وربطها بصلاحيات الوصول التنظيمي للبايب لاين.", "resources": ["SQL Server Connection: Cloud_Retail_Data_Lakehouse_v2 (via Retail-Lakehouse-Gateway-01)", "MongoDB Connection: MongoDB_Local_Retail_Reviews (Version 1.1 + TLS + Basic Auth)", "ADLS Gen2 Connection: ADLS-Retail-Lakehouse (Gateway-enabled Destination)"], "decisions": ["عزل بيانات الاعتماد بالكامل داخل مخزن التشفير الخاص ببوابة Fabric دون وضع أي Secret أو Password في أي نوتبوك أو ملف Git."], "proof": "تمت معاينة البيانات (Preview Data) بنجاح لقواعد البيانات العلائقية والوثائقية من داخل Fabric UI."}, {"id": 9, "phase": "خط النقل الموحد", "title": "بناء بايب لاين النقل الموحد (SQL + MongoDB)", "status": "done", "tag": "11 Sources", "summary": "تصميم وتشغيل البايب لاين الموحد PL_SQLServer_To_ADLS_Bronze_Metadata_Load المعتمد على الـ Metadata لنقل الـ 10 جداول من SQL Server بالتسلسل (Snappy VertiParquet) متبوعاً بنسخ وثائق MongoDB (JSON Lines).", "resources": ["Activity 1 — Lookup_Bronze_Table_List: استعلام Metadata مرتّب بـ TaskOrder (1..10)", "Activity 2 — FE_Load_Bronze_Tables (Sequential ForEach) -> Copy_Current_Table_To_Bronze (Parquet)", "Activity 3 — Copy_MongoDB_Reviews_To_Bronze (On Succeeded -> JSON Set of objects)"], "decisions": ["استخدام String Interpolation والفلترة المرحلية (TaskOrder >= 9) ثم Deactivate المؤقت لنقل الإضافات الجديدة (Marketing Funnel + MongoDB) دون إعادة تحميل الجداول السابقة أو مضاعفة ملفات Bronze.", "اختيار JSON (Set of objects) لـ MongoDB للحفاظ على النصوص متعددة الأسطر والكائنات المتداخلة بدون تلف."], "proof": "اكتمل نقل كل الـ 11 مصدراً (10 Parquet + 1 JSON Lines) بنجاح إلى ADLS Gen2 Bronze."}, {"id": 10, "phase": "طبقة Silver", "title": "تحويلات طبقة Silver وتنظيف البيانات وبناء Delta Lake ACID", "status": "active", "tag": "9 / 11 جاهز · متبقّي 2", "summary": "تطبيق معيار هندسي موحد (Schema Contract، تنظيف وفحص PK/FK، عزل Quarantine، أعلام تحليلية، Full Lineage، تسوية رقمية ومالية، وقفل أمان WRITE_ENABLED). تم اعتماد/تجهيز 9 جداول، ويتبقّى حالياً مراجعة وتشغيل جدولي orders و order_payments.", "resources": ["معتمد في Silver (8): sellers, geolocation_zip_reference, customers, order_items, products, product_category_name_translation, marketing_qualified_leads, closed_deals", "جاهز للتشغيل الفوري في Fabric (1): NB_Silver_Order_Reviews_MongoDB.ipynb (99,224 وثيقة)", "متبقّي للمراجعة النهائية (2): NB_Silver_Orders.ipynb (99,441 صف) و NB_Silver_Order_Payments.ipynb (103,886 صف — مراجعة وترقية كاملة)"], "decisions": ["تطبيق أسلوب المراجعة التعاونية (Comment-and-Replace) على نوتبوكات الزملاء (order_items, orders, products) مع كشف وإصلاح أخطاء حرجة مثل قص order_status بـ lpad(5) وتحويل التواريخ إلى string وازدواجية الكتابة.", "توثيق إثبات Delta Transaction Log (_delta_log/00000000000000000000.json) بـ Deletion Vectors وnullCount=0."], "proof": "تطابق مالي 100% (15,843,553.24 في order_items) و0 Orphans عبر العلاقات المعتمدة؛ وجدولا orders و order_payments في طابور المراجعة التالي."}, {"id": 11, "phase": "تحديث Git والمعمارية", "title": "تنظيم مستودع GitHub والمخططات البصرية ورفع الفرع", "status": "done", "tag": "Commit 6237750", "summary": "تنظيم المستودع الإنتاجي على فرع feature/hybrid-architecture-baseline، وترقية النوتبوكات وقالب البايب لاين المنقّى وسكربتات SQL/TLS، وتحديث README.md وإدراج الصورة المعمارية المحدّثة مع استبعاد كل ملفات HTML المحلية عبر .gitignore.", "resources": ["الفرع: feature/hybrid-architecture-baseline (تم الرفع إلى origin عند 6237750)", "المخطط البصري: docs/architecture/diagrams/Retail_Lakehouse_Hybrid_Architecture_Visual.png + SVG/MMD", "المجلدات المرقّاة: notebooks/silver/ (11)، pipelines/ (قالب منقّى)، sql/ingestion/، scripts/", "الأمان: .gitignore يستبعد readonly_assessment/ و *.html و datasets/ وأي ملفات أسرار"], "decisions": ["استبدال معرفات اتصال Fabric الحقيقية بـ placeholders آمنة داخل قالب البايب لاين.", "تحديث الصورة المعمارية بإزالة PostgreSQL وCSV المؤقتة، وإظهار ADLS Gen2 + OneLake Shortcuts، وتوجيه MongoDB مباشرة إلى بايب لاين Batch (بدون Mirroring)."], "proof": "نجاح 9/9 اختبارات Python، واجتياز 11/11 نوتبوك لفحص JSON و ast.parse، ونظافة تامة في git status بدون أي HTML أو أسرار."}];
+  const ARCH_NODES = {"sqlserver": {"name": "Microsoft SQL Server", "subtitle": "Cloud_Retail_Data_Lakehouse_v2 (10 Tables)", "badge": "المصدر العلائقي", "metrics": ["10 جداول dbo", "8 Olist + 2 Marketing Funnel", "~1.56M صف إجمالي"], "details": "يضم الجداول التشغيلية والمرجعية (customers, orders, order_items, order_payments, products, sellers, category_translation, dim_geolocation) بالإضافة إلى جدولي قمع التسويق (marketing_qualified_leads وclosed_deals) التي تم إنشاؤها وتحميلها بـ BULK INSERT مع Staging."}, "mongodb": {"name": "MongoDB 8.3 (Local TLS)", "subtitle": "retail_reviews.order_reviews (99,224 Docs)", "badge": "المصدر شبه المهيكل", "metrics": ["99,224 وثيقة BSON", "Nested Structs (3)", "TLS preferTLS + SCRAM-SHA-256"], "details": "وثائق تقييمات العملاء المحوّلة بسكريبت mongodb_reviews_loader.py بمفتاح حتمي {review_id}::{order_id}، ومحمية بشهادة X.509 موثوقة محلياً ومستخدم قراءة فقط fabric_reader."}, "gateway": {"name": "On-Premises Data Gateway", "subtitle": "Retail-Lakehouse-Gateway-01", "badge": "جسر الأمان والشبكة", "metrics": ["SQL Server + MongoDB", "Windows Trusted Root CA", "مشفر بالكامل"], "details": "يربط بيئة التشغيل المحلية (SQL Server وMongoDB 8.3) بسحابة Microsoft Fabric بأمان دون فتح بورتات خارجية، مع تفعيل صلاحية Gateway على اتصال ADLS Gen2."}, "pipeline": {"name": "Fabric Data Pipeline", "subtitle": "PL_SQLServer_To_ADLS_Bronze_Metadata_Load", "badge": "محرك النقل الموحد", "metrics": ["Lookup + Sequential ForEach", "10 Parquet + 1 JSONL", "RunId Lineage"], "details": "ينفّذ Lookup_Bronze_Table_List لقراءة قائمة الجداول المعتمدة، ثم FE_Load_Bronze_Tables لنسخ جداول SQL بصيغة Snappy VertiParquet، متبوعاً بـ Copy_MongoDB_Reviews_To_Bronze بصيغة JSON (Set of objects)."}, "adls": {"name": "Azure ADLS Gen2", "subtitle": "stolistlakehouse01 / retail-lakehouse", "badge": "المخزن الفيزيائي المعتمد", "metrics": ["Hierarchical Namespace", "6 مجالات Bronze", "Canonical Source of Truth"], "details": "المخزن الفيزيائي المعتمد للبيانات الخام في 6 مجلدات (crm, sales, catalog, reference, marketing, reviews) مع صلاحيات Azure RBAC محكمة."}, "shortcut": {"name": "OneLake Shortcuts", "subtitle": "Files/bronze/* -> ADLS Gen2", "badge": "افتراضية بدون نسخ", "metrics": ["Zero-Copy Access", "مسارات نسبية موحدة", "بدون تكرار تخزين"], "details": "يربط Retail_Analytics_Lakehouse مباشرة بمجلدات ADLS Gen2، ما يتيح لنوتبوكات PySpark القراءة عبر مسارات Files/bronze/... النظيفة دون أي نسخ إضافي."}, "silver": {"name": "Fabric Spark Silver Layer", "subtitle": "Retail_Analytics_Lakehouse (silver.* Delta)", "badge": "طبقة التنظيف والحوكمة", "metrics": ["9 / 11 جاهز · متبقّي 2", "Delta Lake 4.2 ACID", "Quarantine + Full Lineage"], "details": "جداول Managed Delta داخل schema مخصص (silver.*) مع Deletion Vectors، وعزل للصفوف الفاسدة (_quarantine_*)، وإصلاح مشاكل الجغرافيا والتواريخ والأوزان والترجمة. يتبقّى مراجعة وتشغيل جدولي orders و order_payments."}, "gold": {"name": "المرحلة القادمة: Gold & Serving", "subtitle": "Star Schema + ClickHouse Cloud + Power BI", "badge": "قيد التخطيط التنفيذي", "metrics": ["إكمال order_payments", "تحديث الريبو والوثائق", "Gold + ClickHouse + BI"], "details": "إنهاء آخر جدول Silver (order_payments)، تحديث مستودع GitHub بالمعمارية والـ README والنوتبوكات النهائية (دون تقارير HTML الداخلية)، ثم بناء طبقة Gold واختبار ClickHouse Cloud وPower BI."}};
+  const TABLES_DATA = [{"name": "silver.sellers", "source": "SQL Server", "rows": "3,095", "pk": "seller_id", "status": "done", "status_lbl": "معتمد في Silver", "review": "نسختان (No-Join + With-Geo-Join)", "notebook": "NB_Silver_Sellers.ipynb", "highlights": "إصلاح 2 مدينة تالفة (04482255 وemail) وتوحيد 36 حالة مراجعة وربط 35 تعارض ولاية مع الجغرافيا."}, {"name": "silver.geolocation_zip_reference", "source": "SQL Server", "rows": "19,015 (من 1,000,163)", "pk": "geolocation_zip_code_prefix", "status": "done", "status_lbl": "معتمد في Silver", "review": "تم فحص _delta_log فعلياً", "notebook": "NB_Silver_Dim_Geolocation.ipynb", "highlights": "عزل 29 صفاً خارج البرازيل في _quarantine_dim_geolocation، إزالة 279,668 تكراراً، وتعويض 4 ZIPs موثقة خارجياً بوسيط إحداثيات 1:1."}, {"name": "silver.customers", "source": "SQL Server", "rows": "99,441", "pk": "customer_id", "status": "done", "status_lbl": "معتمد في Silver", "review": "تقييم نوتبوك الزميل + ترقية", "notebook": "NB_Silver_Customers.ipynb", "highlights": "توثيق 96,096 customer_unique_id و2,997 عميل متكرر، 4,119 مدينة نظيفة، و0 تعارض ولايات (278 صف بلا ZIP في الجغرافيا يتطلب LEFT JOIN)."}, {"name": "silver.order_items", "source": "SQL Server", "rows": "112,650", "pk": "(order_id, order_item_id)", "status": "done", "status_lbl": "معتمد في Silver", "review": "مراجعة تعاونية (Comment & Replace)", "notebook": "NB_Silver_Order_Items.ipynb", "highlights": "تطابق مالي 100% (13,591,643.70 + 2,251,909.54 = 15,843,553.24)، 0 Orphans مع silver.sellers، إزالة Pandas anti-pattern، وعلم shipping_limit_outlier_flag لـ 4 صفوف شاذة في 2020."}, {"name": "silver.orders", "source": "SQL Server", "rows": "99,441", "pk": "order_id", "status": "pending", "status_lbl": "بانتظار المراجعة النهائية", "review": "تمت الترقية — يحتاج مراجعة وتشغيل", "notebook": "NB_Silver_Orders.ipynb", "highlights": "إصلاح خطأ lpad(5) الذي قصّ order_status ('delivered'->'deliv') وإعادة الـ 5 تواريخ لنوع TIMESTAMP، مع أعلام الـ 23 انقلاباً زمنياً و7,827 توصيل متأخر؛ بانتظار المراجعة والتشغيل النهائي."}, {"name": "silver.products", "source": "SQL Server", "rows": "32,951", "pk": "product_id", "status": "done", "status_lbl": "معتمد في Silver", "review": "مراجعة تعاونية (Comment & Replace)", "notebook": "NB_Silver_Products.ipynb", "highlights": "إصلاح lenght->length، ترجمة 73/73 فئة (باستكمال pc_gamer وportateis_cozinha)، تحويل 4 أوزان صفرية إلى NULL، ومنع تشويه المتوسطات بـ coalesce(0)، وحذف ازدواجية الكتابة."}, {"name": "silver.product_category_name_translation", "source": "SQL Server", "rows": "71", "pk": "product_category_name", "status": "done", "status_lbl": "معتمد في Silver", "review": "قياسي موحد", "notebook": "NB_Silver_Product_Category_Translation.ipynb", "highlights": "تطابق 1:1 كامل مع 0 NULLs، توثيق إملاء المصدر (home_confort)، وفحص التغطية ضد silver.products."}, {"name": "silver.marketing_qualified_leads", "source": "SQL Server", "rows": "8,000", "pk": "mql_id", "status": "done", "status_lbl": "معتمد في Silver", "review": "قياسي موحد + Auto-Discovery", "notebook": "NB_Silver_Marketing_Qualified_Leads.ipynb", "highlights": "495 صفحة هبوط، توحيد origin مع علم is_unknown_origin لـ 1,159 عميل محتمل (60 NULL + 1,099 unknown)."}, {"name": "silver.closed_deals", "source": "SQL Server", "rows": "842", "pk": "mql_id", "status": "done", "status_lbl": "معتمد في Silver", "review": "تم فحص Dry Run 8/8 خلايا", "notebook": "NB_Silver_Closed_Deals.ipynb", "highlights": "0 Orphans مع MQL، حساب lead_conversion_days، تمييز الصف الشاذ (won_date < first_contact)، وعلم is_active_seller_in_store (380 نشط مقابل 462 غير نشط)."}, {"name": "silver.order_reviews", "source": "MongoDB", "rows": "99,224", "pk": "(review_id, order_id)", "status": "ready", "status_lbl": "جاهز للتشغيل في Fabric", "review": "تسطيح BSON + تحليل أثر Gold", "notebook": "NB_Silver_Order_Reviews_MongoDB.ipynb", "highlights": "تسطيح comment.* وtimestamps.* وsource_lineage.*، منع فخ التضاعف (+664 صف) في Gold، وحساب review_response_hours وis_negative_review (14,575)."}, {"name": "silver.order_payments", "source": "SQL Server", "rows": "103,886", "pk": "(order_id, payment_sequential)", "status": "pending", "status_lbl": "بانتظار المراجعة والترقية", "review": "الهدف التالي في Silver (مسودة)", "notebook": "NB_Silver_Order_Payments.ipynb", "highlights": "بانتظار الفحص الشامل لملف CSV وBronze، مراجعة الأقساط والقسائم، والتسوية المالية الكاملة مع إجمالي order_items (15,843,553.24)."}];
+
+  let currentMilestone = 1;
+  let currentFilter = "all";
+  let pulsing = false;
+
+  function escHtml(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  const NODE_EDGES = {
+    sqlserver: ["e-sql-gw", "e-gw-pl", "e-pl-adls"],
+    mongodb: ["e-mongo-gw", "e-gw-pl", "e-pl-adls"],
+    gateway: ["e-sql-gw", "e-mongo-gw", "e-gw-pl"],
+    pipeline: ["e-gw-pl", "e-pl-adls"],
+    adls: ["e-pl-adls", "e-adls-sc"],
+    shortcut: ["e-adls-sc", "e-sc-sil"],
+    silver: ["e-sc-sil", "e-sil-gold"],
+    gold: ["e-sil-gold"]
+  };
+
+  function selectNode(key) {
+    const data = ARCH_NODES[key];
+    if (!data) return;
+    document.querySelectorAll(".node-g").forEach(el => {
+      el.classList.toggle("active", el.dataset.node === key);
+    });
+    const lit = new Set(NODE_EDGES[key] || []);
+    document.querySelectorAll(".flow-edge").forEach(el => {
+      el.classList.toggle("lit", lit.has(el.id));
+    });
+    document.getElementById("insBadge").textContent = data.badge;
+    document.getElementById("insTitle").textContent = data.name;
+    document.getElementById("insSub").textContent = data.subtitle;
+    document.getElementById("insBody").textContent = data.details;
+    const pillsEl = document.getElementById("insMetrics");
+    pillsEl.innerHTML = data.metrics.map(m => `<span class="mpill">${m}</span>`).join("");
+  }
+
+  function togglePulse() {
+    pulsing = !pulsing;
+    document.getElementById("archCanvasWrap").classList.toggle("simulating", pulsing);
+    document.getElementById("pulseLabel").textContent = pulsing ? "إيقاف محاكاة التدفق" : "تشغيل محاكاة التدفق";
+  }
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute("data-theme") === "dark";
+    html.setAttribute("data-theme", isDark ? "light" : "dark");
+    document.getElementById("themeLabel").textContent = isDark ? "وضع ليلي" : "وضع نهاري";
+  }
+
+  function openLightbox() {
+    document.getElementById("imgLightbox").classList.add("open");
+  }
+
+  function closeLightbox(e) {
+    if (!e || e.target.id === "imgLightbox" || e.target.classList.contains("lightbox-close")) {
+      document.getElementById("imgLightbox").classList.remove("open");
+    }
+  }
+
+  function renderStepper() {
+    const list = document.getElementById("stepperList");
+    list.innerHTML = MILESTONES.map(m => `
+      <button class="step-item ${m.id === currentMilestone ? 'active' : ''} ${m.status === 'active' ? 'is-active-stage' : ''}"
+              role="tab" aria-selected="${m.id === currentMilestone}"
+              onclick="selectMilestone(${m.id})">
+        <span class="step-num">${m.id}</span>
+        <span>
+          <span class="step-phase">${m.phase}</span>
+          <span class="step-name">${m.title}</span>
+        </span>
+        <span class="badge ${m.status === 'done' ? 'b-done' : 'b-active'}">${m.tag}</span>
+      </button>
+    `).join("");
+  }
+
+  function selectMilestone(id) {
+    currentMilestone = id;
+    renderStepper();
+    const m = MILESTONES.find(x => x.id === id);
+    if (!m) return;
+    const det = document.getElementById("milestoneDetail");
+    const badgeCls = m.status === "done" ? "b-done" : "b-active";
+    det.innerHTML = `
+      <div>
+        <div class="md-top">
+          <span class="badge ${badgeCls}">${m.phase} · ${m.tag}</span>
+          <span class="mono" style="font-size:0.82rem;color:var(--ink-muted);">STAGE ${m.id} / 11</span>
+        </div>
+        <h3 class="md-title">${m.title}</h3>
+        <p class="md-summary">${m.summary}</p>
+        <div class="md-cols">
+          <div class="md-box">
+            <h4>الموارد والمكونات المنفّذة</h4>
+            <ul>${m.resources.map(r => `<li>${escHtml(r)}</li>`).join("")}</ul>
+          </div>
+          <div class="md-box">
+            <h4>القرارات الهندسية والمشاكل المحلولة</h4>
+            <ul>${m.decisions.map(d => `<li>${escHtml(d)}</li>`).join("")}</ul>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="proof-strip">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--emerald)" stroke-width="2.2" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <span><strong>الإثبات التشغيلي:</strong> ${escHtml(m.proof)}</span>
+        </div>
+        <div class="md-footer">
+          <button class="btn" ${id <= 1 ? 'disabled style="opacity:0.45;cursor:not-allowed;"' : ''} onclick="selectMilestone(${id - 1})">المرحلة السابقة</button>
+          <button class="btn btn-primary" ${id >= MILESTONES.length ? 'disabled style="opacity:0.45;cursor:not-allowed;"' : ''} onclick="selectMilestone(${id + 1})">المرحلة التالية</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function setTableFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll(".fpill").forEach(p => p.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+    renderTableMatrix();
+  }
+
+  function renderTableMatrix() {
+    const q = (document.getElementById("tableSearch").value || "").trim().toLowerCase();
+    const filtered = TABLES_DATA.filter(t => {
+      if (currentFilter === "done" && t.status !== "done") return false;
+      if (currentFilter === "ready" && t.status !== "ready") return false;
+      if (currentFilter === "pending" && t.status !== "pending") return false;
+      if (currentFilter === "mongodb" && t.source !== "MongoDB") return false;
+      if (q) {
+        const hay = `${t.name} ${t.source} ${t.pk} ${t.notebook} ${t.highlights} ${t.review}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+
+    const body = document.getElementById("matrixBody");
+    if (!filtered.length) {
+      body.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--ink-muted);padding:24px;">لا توجد جداول مطابقة لعبارة البحث الحالية.</td></tr>`;
+      return;
+    }
+    body.innerHTML = filtered.map(t => {
+      const bCls = t.status === "done" ? "b-done" : (t.status === "ready" ? "b-active" : "b-pending");
+      return `
+        <tr>
+          <td>
+            <div class="mono" style="font-weight:600;color:var(--ink);">${t.name}</div>
+            <div class="mono" style="font-size:0.76rem;color:var(--ink-muted);margin-top:2px;">${t.notebook}</div>
+          </td>
+          <td><span class="badge ${t.source === 'MongoDB' ? 'b-active' : 'b-done'}">${t.source}</span></td>
+          <td class="mono" style="font-weight:600;">${t.rows}</td>
+          <td class="mono" style="font-size:0.8rem;">${t.pk}</td>
+          <td>
+            <span class="badge ${bCls}">${t.status_lbl}</span>
+            <div style="font-size:0.76rem;color:var(--ink-muted);margin-top:4px;">${t.review}</div>
+          </td>
+          <td style="color:var(--ink-soft);max-width:420px;">${t.highlights}</td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    selectNode("sqlserver");
+    selectMilestone(1);
+    renderTableMatrix();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Understanding &amp; Gold Star Schema Blueprint — Retail Lakehouse Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --canvas: #F7F5F0;
+    --surface: #FFFFFF;
+    --surface-alt: #F1EFEA;
+    --ink: #0F172A;
+    --ink-soft: #334155;
+    --ink-muted: #64748B;
+    --line: #DFDCD3;
+    --line-strong: #C5C0B5;
+    --teal: #0F766E;
+    --teal-soft: rgba(15, 118, 110, 0.10);
+    --cobalt: #0369A1;
+    --cobalt-soft: rgba(3, 105, 161, 0.10);
+    --amber: #B45309;
+    --amber-soft: rgba(180, 83, 9, 0.11);
+    --crimson: #B91C1C;
+    --crimson-soft: rgba(185, 28, 28, 0.10);
+    --violet: #6D28D9;
+    --violet-soft: rgba(109, 40, 217, 0.10);
+    --shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+  }
+  html[data-theme="dark"] {
+    --canvas: #0B111E;
+    --surface: #121B2E;
+    --surface-alt: #18243D;
+    --ink: #F1F5F9;
+    --ink-soft: #CBD5E1;
+    --ink-muted: #94A3B8;
+    --line: #23324F;
+    --line-strong: #354A73;
+    --teal: #2DD4BF;
+    --teal-soft: rgba(45, 212, 191, 0.13);
+    --cobalt: #38BDF8;
+    --cobalt-soft: rgba(56, 189, 248, 0.14);
+    --amber: #FBBF24;
+    --amber-soft: rgba(251, 191, 36, 0.14);
+    --crimson: #F87171;
+    --crimson-soft: rgba(248, 113, 113, 0.14);
+    --violet: #A78BFA;
+    --violet-soft: rgba(167, 139, 250, 0.14);
+    --shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  svg { direction: ltr; unicode-bidi: isolate; }
+  svg text { direction: ltr; unicode-bidi: embed; }
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+    line-height: 1.7;
+    font-variant-numeric: tabular-nums;
+  }
+  .mono { font-family: "IBM Plex Mono", Consolas, monospace; display: inline-block; }
+  .topbar {
+    position: sticky; top: 0; z-index: 100;
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-inner {
+    max-width: 1340px; margin: 0 auto; padding: 12px 24px;
+    display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1rem; }
+  .brand-mark {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: var(--teal); color: #fff; display: grid; place-items: center;
+  }
+  .nav-links { display: flex; gap: 6px; flex-wrap: wrap; }
+  .nav-link {
+    text-decoration: none; color: var(--ink-soft); font-size: 0.85rem; font-weight: 600;
+    padding: 6px 11px; border-radius: 8px;
+  }
+  .nav-link:hover { background: var(--surface-alt); color: var(--ink); }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+    padding: 7px 13px; border-radius: 9px; font: inherit; font-size: 0.84rem; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+  }
+  .btn-primary { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .page { max-width: 1340px; margin: 0 auto; padding: 30px 24px 72px; }
+
+  .hero {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 20px;
+    padding: 32px; box-shadow: var(--shadow);
+    display: grid; grid-template-columns: 1.25fr 1fr; gap: 28px; align-items: center;
+  }
+  @media (max-width: 960px) { .hero { grid-template-columns: 1fr; } }
+  .hero h1 { margin: 0 0 12px; font-size: clamp(1.55rem, 2.5vw, 2.15rem); line-height: 1.28; }
+  .hero-lead { margin: 0; color: var(--ink-soft); font-size: 0.96rem; }
+  .kpi-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 20px; }
+  @media (max-width: 720px) { .kpi-strip { grid-template-columns: repeat(2, 1fr); } }
+  .kpi-box { background: var(--surface-alt); border: 1px solid var(--line); border-radius: 13px; padding: 14px; }
+  .kpi-val { font-size: 1.22rem; font-weight: 700; color: var(--ink); display: block; }
+  .kpi-lbl { font-size: 0.77rem; color: var(--ink-muted); }
+
+  .explainer-box {
+    background: var(--surface-alt); border: 1px solid var(--line); border-radius: 12px;
+    padding: 13px 15px; font-size: 0.85rem; color: var(--ink-soft); line-height: 1.65;
+  }
+  .explainer-box strong { color: var(--ink); }
+
+  .sec { margin-top: 48px; }
+  .sec-head { margin-bottom: 18px; }
+  .sec-head h2 { margin: 0 0 4px; font-size: 1.42rem; }
+  .sec-head p { margin: 0; color: var(--ink-muted); font-size: 0.92rem; }
+
+  .badge {
+    display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px;
+    font-size: 0.75rem; font-weight: 700; white-space: nowrap;
+  }
+  .b-teal { background: var(--teal-soft); color: var(--teal); }
+  .b-cobalt { background: var(--cobalt-soft); color: var(--cobalt); }
+  .b-amber { background: var(--amber-soft); color: var(--amber); }
+  .b-crimson { background: var(--crimson-soft); color: var(--crimson); }
+  .b-violet { background: var(--violet-soft); color: var(--violet); }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+  @media (max-width: 980px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+    padding: 22px; box-shadow: var(--shadow);
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .card h3 { margin: 0; font-size: 1.06rem; }
+  .card-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  .sla-shock {
+    display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: center;
+    background: var(--surface-alt); border-radius: 14px; padding: 18px; border: 1px solid var(--line);
+  }
+  .sla-num { font-size: 1.85rem; font-weight: 700; display: block; }
+
+  .dict-controls {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pill {
+    border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-soft);
+    padding: 6px 13px; border-radius: 999px; font: inherit; font-size: 0.83rem; font-weight: 600; cursor: pointer;
+  }
+  .pill.active { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .search-box {
+    border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
+    padding: 8px 14px; border-radius: 10px; font: inherit; font-size: 0.86rem; min-width: 260px;
+  }
+  .dict-layout { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 18px; align-items: start; }
+  @media (max-width: 960px) { .dict-layout { grid-template-columns: 1fr; } }
+  .table-list { display: grid; gap: 8px; min-width: 0; max-width: 100%; }
+  .tbl-btn {
+    text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 14px; cursor: pointer; font: inherit; color: var(--ink);
+    display: flex; flex-direction: column; gap: 5px;
+    width: 100%; min-width: 0; max-width: 100%; overflow: hidden;
+  }
+  .tbl-btn:hover { border-color: var(--cobalt); }
+  .tbl-btn.active { border-color: var(--teal); background: var(--teal-soft); }
+  .tbl-detail {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+    padding: 24px; box-shadow: var(--shadow);
+    min-width: 0; max-width: 100%; overflow: hidden;
+  }
+  table.col-tbl { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin-top: 14px; }
+  table.col-tbl th {
+    background: var(--surface-alt); text-align: left; padding: 10px 12px;
+    border-bottom: 1px solid var(--line); color: var(--ink-soft);
+  }
+  table.col-tbl td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+
+  .star-layout { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: stretch; }
+  @media (max-width: 980px) { .star-layout { grid-template-columns: 1fr; } }
+  .star-canvas-wrap {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
+    padding: 18px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px;
+  }
+  .star-toolbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+    padding-bottom: 10px; border-bottom: 1px solid var(--line);
+  }
+  .star-legend { display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.78rem; color: var(--ink-muted); align-items: center; }
+  .star-edge {
+    fill: none; stroke: var(--line-strong); stroke-width: 1.8; opacity: 0.35;
+    transition: stroke 0.25s ease, opacity 0.25s ease, stroke-width 0.25s ease;
+  }
+  .star-edge.lit { stroke: var(--teal); stroke-width: 2.6; opacity: 0.95; }
+  .star-edge-flow {
+    fill: none; stroke: var(--cobalt); stroke-width: 2.4; stroke-linecap: round;
+    stroke-dasharray: 8 10; opacity: 0; pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .star-edge-flow.lit, .star-all-flow .star-edge-flow {
+    opacity: 0.92;
+    animation: flowDash 1.2s linear infinite;
+  }
+  .star-all-flow .star-edge { stroke: var(--teal); opacity: 0.65; }
+  @keyframes flowDash { from { stroke-dashoffset: 36; } to { stroke-dashoffset: 0; } }
+  .star-node { cursor: pointer; transition: opacity 0.25s ease; }
+  .star-node rect.node-bg { stroke-width: 1.8; transition: all 0.22s ease; }
+  .star-node.dimmed { opacity: 0.36; }
+  .star-node.connected rect.node-bg { stroke-width: 2.4; }
+  .star-node.active rect.node-bg {
+    stroke-width: 3;
+    filter: drop-shadow(0 6px 14px rgba(15, 118, 110, 0.30));
+  }
+
+  .kpi-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px; display: flex; flex-direction: column; gap: 8px; box-shadow: var(--shadow);
+  }
+  .kpi-formula {
+    background: var(--surface-alt); border: 1px dashed var(--line-strong); border-radius: 8px;
+    padding: 8px 10px; font-size: 0.8rem; color: var(--ink);
+  }
+  .mart-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow);
+  }
+  .mart-card ul { margin: 0; padding-left: 18px; font-size: 0.86rem; color: var(--ink-soft); display: grid; gap: 4px; }
+  .decision-banner {
+    background: var(--teal-soft); border: 1px solid var(--teal); border-radius: 14px;
+    padding: 16px 20px; font-size: 0.9rem; color: var(--ink);
+  }
+  footer {
+    margin-top: 52px; padding-top: 18px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    font-size: 0.82rem; color: var(--ink-muted);
+  }
+  @media print {
+    .topbar, .controls, .dict-controls { display: none !important; }
+    body { background: #fff; color: #000; }
+    .card, .hero, .tbl-detail, .mart-card, .kpi-card { box-shadow: none; break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <span>Business &amp; Gold Blueprint — Olist Retail Lakehouse</span>
+    </div>
+    <nav class="nav-links" aria-label="Main Navigation">
+      <a class="nav-link" href="#story">Business Story</a>
+      <a class="nav-link" href="#insights">Real Insights</a>
+      <a class="nav-link" href="#dictionary">11-Table Dictionary</a>
+      <a class="nav-link" href="#star-schema">Gold Star Schema</a>
+      <a class="nav-link" href="#kpis">KPI Catalog</a>
+      <a class="nav-link" href="#marts">Proposed Marts</a>
+    </nav>
+    <div class="controls">
+      <a class="btn" href="Business_and_Gold_Blueprint_AR.html" title="التبديل إلى النسخة العربية">العربية</a>
+      <a class="btn" href="Project_Journey_Status_EN.html">Project Journey</a>
+      <button class="btn" onclick="window.print()">Print / PDF</button>
+      <button class="btn btn-primary" onclick="toggleTheme()" id="themeBtn">Dark Mode</button>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+
+  <section class="hero" id="story">
+    <div>
+      <span class="badge b-teal" style="margin-bottom:10px;">Business Discovery Before Gold · Olist Brazil (2016–2018)</span>
+      <h1>How <span class="mono">Olist Marketplace</span> Works &amp; What Our Data Reveals</h1>
+      <p class="hero-lead">
+        <strong>Olist</strong> is not a single store holding its own inventory — it is a <strong>Brazilian multi-seller e-commerce marketplace</strong> connecting small merchants (<strong>3,095 active sellers</strong>) with shoppers nationwide (<strong>96,096 unique buyers</strong>), orchestrating payments, carrier handoffs, and customer feedback. By combining store transactions with the <strong>B2B Marketing Funnel</strong>, our Lakehouse tracks the full loop from a merchant's first sales inquiry (<strong>MQL</strong>) to order fulfillment, cash collection, and customer review.
+      </p>
+      <div class="kpi-strip">
+        <div class="kpi-box"><span class="kpi-val mono">R$ 13.59M</span><span class="kpi-lbl">Gross Merchandise Value (GMV)</span></div>
+        <div class="kpi-box"><span class="kpi-val mono">99,441</span><span class="kpi-lbl">Total Orders (97.02% Delivered)</span></div>
+        <div class="kpi-box"><span class="kpi-val mono">R$ 160.58</span><span class="kpi-lbl">Average Order Value (AOV)</span></div>
+        <div class="kpi-box"><span class="kpi-val mono">91.89%</span><span class="kpi-lbl">On-Time Delivery SLA</span></div>
+        <div class="kpi-box"><span class="kpi-val mono">96,096 / 99,441</span><span class="kpi-lbl">Unique People vs Order Rows (3.12% Repeat)</span></div>
+        <div class="kpi-box"><span class="kpi-val mono">8,000 &rarr; 842</span><span class="kpi-lbl">Seller MQLs &rarr; Signed Deals (10.53%)</span></div>
+      </div>
+      <div class="explainer-box" style="margin-top:14px;">
+        <strong>Why are there <span class="mono">96,096</span> unique buyers when <span class="mono">silver.customers</span> has <span class="mono">99,441</span> rows?</strong><br>
+        In Olist's database, every time a customer places a new order, the platform generates a fresh <span class="mono">customer_id</span> specifically for that order (creating <strong>99,441</strong> rows matching the 99,441 orders). However, <span class="mono">customer_unique_id</span> identifies the actual human shopper: there are <strong>96,096 distinct buyers</strong> — <strong>93,099</strong> purchased only once (<span class="mono">96.88%</span>), while just <strong>2,997</strong> repeat buyers placed the extra <span class="mono">3,345</span> orders!
+      </div>
+    </div>
+
+    <div style="background:var(--surface-alt);border:1px solid var(--line);border-radius:16px;padding:16px;">
+      <svg viewBox="0 0 460 360" width="100%" dir="ltr" style="direction:ltr;" role="img" aria-label="Olist End-to-End Business Lifecycle">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="var(--teal)"/>
+          </marker>
+        </defs>
+        <text x="230" y="22" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink)">Olist End-to-End Business Lifecycle</text>
+
+        <rect x="16" y="42" width="428" height="58" rx="12" fill="var(--violet-soft)" stroke="var(--violet)" stroke-width="1.6"/>
+        <text x="32" y="66" text-anchor="start" font-size="11.5" font-weight="700" fill="var(--violet)">1. B2B Seller Acquisition (SQL Marketing Funnel)</text>
+        <text x="32" y="86" text-anchor="start" font-size="10.5" fill="var(--ink-soft)">8,000 MQLs -&gt; 842 Closed Deals (10.53%) -&gt; 380 Active (45.13%)</text>
+
+        <line x1="230" y1="100" x2="230" y2="124" stroke="var(--teal)" stroke-width="2" marker-end="url(#ar)"/>
+
+        <rect x="16" y="128" width="202" height="82" rx="12" fill="var(--teal-soft)" stroke="var(--teal)" stroke-width="1.6"/>
+        <text x="30" y="152" text-anchor="start" font-size="11.5" font-weight="700" fill="var(--teal)">2. Sellers &amp; Catalog</text>
+        <text x="30" y="172" text-anchor="start" font-size="10.5" fill="var(--ink-soft)">3,095 Sellers (60% SP)</text>
+        <text x="30" y="192" text-anchor="start" font-size="10.5" fill="var(--ink-soft)">32,951 Products (73 Cats)</text>
+
+        <rect x="242" y="128" width="202" height="82" rx="12" fill="var(--cobalt-soft)" stroke="var(--cobalt)" stroke-width="1.6"/>
+        <text x="256" y="152" text-anchor="start" font-size="11.5" font-weight="700" fill="var(--cobalt)">3. Buyers &amp; Orders</text>
+        <text x="256" y="172" text-anchor="start" font-size="10.5" fill="var(--ink-soft)">96,096 Unique Buyers</text>
+        <text x="256" y="192" text-anchor="start" font-size="10.5" fill="var(--ink-soft)">99,441 Orders · 112,650 Items</text>
+
+        <line x1="218" y1="169" x2="238" y2="169" stroke="var(--teal)" stroke-width="2" marker-end="url(#ar)"/>
+        <line x1="230" y1="210" x2="230" y2="234" stroke="var(--teal)" stroke-width="2" marker-end="url(#ar)"/>
+
+        <rect x="16" y="238" width="202" height="54" rx="12" fill="var(--amber-soft)" stroke="var(--amber)" stroke-width="1.6"/>
+        <text x="30" y="260" text-anchor="start" font-size="11.5" font-weight="700" fill="var(--amber)">4. Payments (R$ 16.01M)</text>
+        <text x="30" y="279" text-anchor="start" font-size="10.5" fill="var(--ink-soft)">78.3% Credit · 17.9% Boleto</text>
+
+        <rect x="242" y="238" width="202" height="54" rx="12" fill="var(--surface)" stroke="var(--line-strong)" stroke-width="1.6"/>
+        <text x="256" y="260" text-anchor="start" font-size="11.5" font-weight="700" fill="var(--ink)">5. Logistics (12.6d Avg)</text>
+        <text x="256" y="279" text-anchor="start" font-size="10.5" fill="var(--ink-soft)">91.9% On-Time · 8.1% Late</text>
+
+        <line x1="230" y1="292" x2="230" y2="306" stroke="var(--teal)" stroke-width="2" marker-end="url(#ar)"/>
+
+        <rect x="16" y="310" width="428" height="42" rx="10" fill="var(--crimson-soft)" stroke="var(--crimson)" stroke-width="1.5"/>
+        <text x="230" y="336" text-anchor="middle" font-size="11" font-weight="700" fill="var(--crimson)">6. MongoDB Reviews (99,224): On-Time 4.29★ vs Late 2.57★ (-1.73★)</text>
+      </svg>
+    </div>
+  </section>
+
+  <section class="sec" id="insights">
+    <div class="sec-head">
+      <h2>Verified Marketplace Insights (Before Building Gold)</h2>
+      <p>Every metric below is computed directly from our project datasets (<span class="mono">2016-09-04</span> to <span class="mono">2018-10-17</span>) to highlight where real business value lives.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">
+          <h3>Top 6 Product Categories by Revenue (GMV)</h3>
+          <span class="badge b-teal">73/73 Categories Translated</span>
+        </div>
+        <svg viewBox="0 0 540 220" width="100%" dir="ltr" style="direction:ltr;" role="img" aria-label="Top 6 Categories">
+          <g font-family="IBM Plex Sans, Segoe UI, sans-serif" font-size="11.5" text-anchor="start">
+            <text x="6" y="22" fill="var(--ink)" font-weight="600">health_beauty</text>
+            <rect x="175" y="10" width="205" height="16" rx="4" fill="var(--teal)"/>
+            <text x="388" y="22" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">R$ 1.26M (9,670)</text>
+
+            <text x="6" y="56" fill="var(--ink)" font-weight="600">watches_gifts</text>
+            <rect x="175" y="44" width="196" height="16" rx="4" fill="var(--teal)"/>
+            <text x="379" y="56" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">R$ 1.21M (5,991)</text>
+
+            <text x="6" y="90" fill="var(--ink)" font-weight="600">bed_bath_table</text>
+            <rect x="175" y="78" width="169" height="16" rx="4" fill="var(--cobalt)"/>
+            <text x="352" y="90" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">R$ 1.04M (11,115 #1)</text>
+
+            <text x="6" y="124" fill="var(--ink)" font-weight="600">sports_leisure</text>
+            <rect x="175" y="112" width="161" height="16" rx="4" fill="var(--cobalt)"/>
+            <text x="344" y="124" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">R$ 0.99M (8,641)</text>
+
+            <text x="6" y="158" fill="var(--ink)" font-weight="600">computers_accessories</text>
+            <rect x="175" y="146" width="149" height="16" rx="4" fill="var(--violet)"/>
+            <text x="332" y="158" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">R$ 0.91M (7,827)</text>
+
+            <text x="6" y="192" fill="var(--ink)" font-weight="600">furniture_decor</text>
+            <rect x="175" y="180" width="119" height="16" rx="4" fill="var(--amber)"/>
+            <text x="302" y="192" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">R$ 0.73M (8,334)</text>
+          </g>
+        </svg>
+        <p style="margin:0;font-size:0.84rem;color:var(--ink-muted);"><strong>Business Insight:</strong> <span class="mono">watches_gifts</span> drives high revenue per unit (<span class="mono">5,991</span> units), whereas <span class="mono">bed_bath_table</span> leads total unit volume (<span class="mono">11,115</span> units).</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>Strongest Causal Driver: Late Delivery Crashes Ratings</h3>
+          <span class="badge b-crimson">-1.73★ Rating Drop</span>
+        </div>
+        <div class="sla-shock">
+          <div style="text-align:center;">
+            <span class="badge b-teal">On-Time (91.89%)</span>
+            <span class="sla-num mono" style="color:var(--teal);margin-top:6px;">4.294 / 5</span>
+            <span style="font-size:0.8rem;color:var(--ink-muted);">88,644 delivered orders</span>
+          </div>
+          <div style="font-weight:700;font-size:1.1rem;color:var(--crimson);">VS</div>
+          <div style="text-align:center;">
+            <span class="badge b-crimson">Late Delivery (8.11%)</span>
+            <span class="sla-num mono" style="color:var(--crimson);margin-top:6px;">2.566 / 5</span>
+            <span style="font-size:0.8rem;color:var(--ink-muted);">7,826 late orders</span>
+          </div>
+        </div>
+        <div style="border-top:1px dashed var(--line);padding-top:12px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:6px;">
+            <strong>Payment Mix (<span class="mono">R$ 16.01M</span>)</strong>
+            <span class="mono" style="color:var(--ink-muted);">Avg Installments: 3.51</span>
+          </div>
+          <div style="display:flex;height:16px;border-radius:999px;overflow:hidden;gap:2px;">
+            <div style="width:78.34%;background:var(--cobalt);" title="Credit Card 78.34%"></div>
+            <div style="width:17.92%;background:var(--teal);" title="Boleto 17.92%"></div>
+            <div style="width:2.37%;background:var(--amber);" title="Voucher 2.37%"></div>
+            <div style="width:1.37%;background:var(--violet);" title="Debit 1.36%"></div>
+          </div>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:0.79rem;color:var(--ink-soft);margin-top:8px;">
+            <span><strong>Credit Card:</strong> 78.34%</span>
+            <span><strong>Boleto:</strong> 17.92%</span>
+            <span><strong>Voucher:</strong> 2.37%</span>
+            <span><strong>Debit:</strong> 1.36%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>B2B Seller Acquisition Funnel — What Is an <span class="mono">MQL</span>?</h3>
+          <span class="badge b-violet">Median Close: 14 Days</span>
+        </div>
+        <div class="explainer-box">
+          <strong>What does <span class="mono">MQL</span> (Marketing Qualified Lead) mean?</strong><br>
+          Not retail consumers! An <strong>MQL</strong> is a <strong>prospective merchant / brand (B2B)</strong> that registered via a landing page or ad to sell on Olist:
+          <br>1) <strong>8,000 MQLs:</strong> Merchants expressing interest (Organic Search 2,296 · Paid 1,586 · Social 1,350...).
+          <br>2) <strong>842 Closed Deals (<span class="mono">10.53%</span>):</strong> Merchants converted by SDR/SR reps who signed an Olist seller contract.
+          <br>3) <strong>380 Active Sellers (<span class="mono">45.13%</span>):</strong> Signed sellers who actually fulfilled orders — leaving <strong>462 contracted sellers</strong> yet to make their first sale!
+        </div>
+        <svg viewBox="0 0 500 155" width="100%" dir="ltr" style="direction:ltr;" role="img" aria-label="Seller Acquisition Funnel">
+          <rect x="10" y="10" width="480" height="36" rx="8" fill="var(--cobalt-soft)" stroke="var(--cobalt)"/>
+          <text x="250" y="33" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--cobalt)">8,000 MQLs (Prospective Sellers: Organic 2,296 · Paid 1,586 · Social 1,350)</text>
+
+          <rect x="95" y="58" width="310" height="36" rx="8" fill="var(--violet-soft)" stroke="var(--violet)"/>
+          <text x="250" y="81" text-anchor="middle" font-size="12" font-weight="700" fill="var(--violet)">842 Closed Deals (10.53% Signed Contract)</text>
+
+          <rect x="155" y="106" width="190" height="36" rx="8" fill="var(--teal-soft)" stroke="var(--teal)"/>
+          <text x="250" y="129" text-anchor="middle" font-size="12" font-weight="700" fill="var(--teal)">380 Active Sellers (45.13% Sold)</text>
+        </svg>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <h3>Geographic Concentration &amp; <span class="mono">Freight Ratio</span></h3>
+          <span class="badge b-amber">Freight = 16.57% of GMV</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div style="background:var(--surface-alt);padding:14px;border-radius:12px;border:1px solid var(--line);">
+            <div style="font-size:0.8rem;color:var(--ink-muted);">Buyer Spread (27 States)</div>
+            <div style="font-weight:700;margin-top:4px;">SP: 41,746 (42.0%)</div>
+            <div style="font-size:0.84rem;color:var(--ink-soft);">RJ: 12,852 · MG: 11,635 · Rest of Brazil: 58%</div>
+          </div>
+          <div style="background:var(--surface-alt);padding:14px;border-radius:12px;border:1px solid var(--line);">
+            <div style="font-size:0.8rem;color:var(--ink-muted);">Seller Warehouses (Top 3)</div>
+            <div style="font-weight:700;margin-top:4px;">SP: 1,849 (59.7%)</div>
+            <div style="font-size:0.84rem;color:var(--ink-soft);">PR: 349 · MG: 244 · Concentrated in Southeast</div>
+          </div>
+        </div>
+        <div class="explainer-box">
+          <strong>What does <span class="mono">Freight Ratio = 16.57%</span> tell us?</strong><br>
+          Formula: <span class="mono">Total Freight (2.25M) ÷ Total GMV (13.59M) = 16.57%</span> — on average, shoppers pay <strong>R$ 16.57 in shipping for every R$ 100 of goods</strong>.<br>
+          <strong>Why?</strong> Brazil is continent-sized, yet <strong>59.7% of sellers</strong> cluster in a single state (<strong>São Paulo — SP</strong>) while <strong>58% of buyers</strong> live across distant states. Long-haul inter-state routes inflate shipping costs, stretch average transit to <strong>12.6 days</strong>, and directly drive the <span class="mono">8.11%</span> late deliveries that crush scores from <span class="mono">4.29★</span> to <span class="mono">2.57★</span>.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="dictionary">
+    <div class="sec-head">
+      <h2>Interactive 11-Table Data Dictionary (Post-Silver State)</h2>
+      <p>Click any table or search by column/business keyword to inspect its grain, primary key, business meaning, and verified Silver quality fixes.</p>
+    </div>
+
+    <div class="dict-controls">
+      <div class="pills" id="dictPills">
+        <button class="pill active" onclick="filterDict('all', this)">All (11)</button>
+        <button class="pill" onclick="filterDict('sales', this)">Sales &amp; Orders (4)</button>
+        <button class="pill" onclick="filterDict('actors', this)">Customers, Sellers &amp; Geo (3)</button>
+        <button class="pill" onclick="filterDict('catalog', this)">Products &amp; Catalog (2)</button>
+        <button class="pill" onclick="filterDict('marketing', this)">B2B Seller Funnel (2)</button>
+      </div>
+      <input class="search-box" type="search" id="dictSearch" placeholder="Search table or column (e.g. freight, mql)..." oninput="renderDictList()">
+    </div>
+
+    <div class="dict-layout">
+      <div class="table-list" id="dictList"></div>
+      <div class="tbl-detail" id="dictDetail"></div>
+    </div>
+  </section>
+
+  <section class="sec" id="star-schema">
+    <div class="sec-head">
+      <h2>Interactive <span class="mono">Gold Star Schema</span> (Curved Flow &amp; Live Highlighting)</h2>
+      <p>Transforms our 11 Silver tables into <strong>4 Conformed Dimensions</strong> + <strong>5 Grain-Isolated Fact Tables</strong> so revenue and metrics never double-count.</p>
+    </div>
+
+    <div class="decision-banner" style="margin-bottom:18px;">
+      <strong>Approved v1 Implementation Decisions:</strong>
+      Gold tables are stored as <strong>Delta Lake</strong> inside <strong>Microsoft Fabric Lakehouse</strong> (for seamless Power BI integration), authored in <strong>pure Spark SQL (<span class="mono">%%sql</span>)</strong>, while <strong><span class="mono">dbt-clickhouse</span></strong> manages analytics marts and tests inside <strong>ClickHouse Cloud</strong>.
+    </div>
+
+    <div class="star-layout">
+      <div class="star-canvas-wrap" id="starCanvasWrap">
+        <div class="star-toolbar">
+          <div class="star-legend">
+            <span class="badge b-teal">4 Dimensions (SCD1)</span>
+            <span class="badge b-cobalt">5 Isolated Facts</span>
+            <span>Hover or click any table to trace its live relationships</span>
+          </div>
+          <button class="btn btn-primary" id="starFlowBtn" onclick="toggleStarFlow()">Animate All Flows</button>
+        </div>
+
+        <svg viewBox="0 0 780 415" width="100%" dir="ltr" style="direction:ltr;" role="img" aria-label="Interactive Gold Star Schema">
+          <defs>
+            <filter id="card-sh" x="-5%" y="-5%" width="110%" height="115%">
+              <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0F172A" flood-opacity="0.08"/>
+            </filter>
+          </defs>
+
+          <text x="108" y="20" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--teal)">CONFORMED DIMENSIONS (4)</text>
+          <text x="530" y="20" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--cobalt)">GRAIN-ISOLATED FACT TABLES (5)</text>
+
+          <g id="starEdges">
+            <path class="star-edge" data-edge="dim_date:fact_order_items" d="M 192 66 C 242 66, 248 70, 295 70"/>
+            <path class="star-edge-flow" data-edge="dim_date:fact_order_items" d="M 192 66 C 242 66, 248 70, 295 70"/>
+
+            <path class="star-edge" data-edge="dim_date:fact_orders" d="M 192 72 C 250 72, 245 162, 295 162"/>
+            <path class="star-edge-flow" data-edge="dim_date:fact_orders" d="M 192 72 C 250 72, 245 162, 295 162"/>
+
+            <path class="star-edge" data-edge="dim_date:fact_payments" d="M 192 78 C 258 78, 238 256, 295 256"/>
+            <path class="star-edge-flow" data-edge="dim_date:fact_payments" d="M 192 78 C 258 78, 238 256, 295 256"/>
+
+            <path class="star-edge" data-edge="dim_date:fact_reviews" d="M 192 60 C 380 18, 480 42, 550 110"/>
+            <path class="star-edge-flow" data-edge="dim_date:fact_reviews" d="M 192 60 C 380 18, 480 42, 550 110"/>
+
+            <path class="star-edge" data-edge="dim_date:fact_marketing_funnel" d="M 192 64 C 410 24, 520 120, 550 245"/>
+            <path class="star-edge-flow" data-edge="dim_date:fact_marketing_funnel" d="M 192 64 C 410 24, 520 120, 550 245"/>
+
+            <path class="star-edge" data-edge="dim_customer:fact_order_items" d="M 192 152 C 245 152, 245 84, 295 84"/>
+            <path class="star-edge-flow" data-edge="dim_customer:fact_order_items" d="M 192 152 C 245 152, 245 84, 295 84"/>
+
+            <path class="star-edge" data-edge="dim_customer:fact_orders" d="M 192 162 C 242 162, 248 175, 295 175"/>
+            <path class="star-edge-flow" data-edge="dim_customer:fact_orders" d="M 192 162 C 242 162, 248 175, 295 175"/>
+
+            <path class="star-edge" data-edge="dim_customer:fact_payments" d="M 192 172 C 248 172, 245 270, 295 270"/>
+            <path class="star-edge-flow" data-edge="dim_customer:fact_payments" d="M 192 172 C 248 172, 245 270, 295 270"/>
+
+            <path class="star-edge" data-edge="dim_customer:fact_reviews" d="M 192 158 C 360 125, 485 130, 550 135"/>
+            <path class="star-edge-flow" data-edge="dim_customer:fact_reviews" d="M 192 158 C 360 125, 485 130, 550 135"/>
+
+            <path class="star-edge" data-edge="dim_seller:fact_order_items" d="M 192 248 C 252 248, 242 98, 295 98"/>
+            <path class="star-edge-flow" data-edge="dim_seller:fact_order_items" d="M 192 248 C 252 248, 242 98, 295 98"/>
+
+            <path class="star-edge" data-edge="dim_seller:fact_marketing_funnel" d="M 192 260 C 370 355, 495 340, 550 280"/>
+            <path class="star-edge-flow" data-edge="dim_seller:fact_marketing_funnel" d="M 192 260 C 370 355, 495 340, 550 280"/>
+
+            <path class="star-edge" data-edge="dim_product:fact_order_items" d="M 192 350 C 262 350, 248 112, 295 112"/>
+            <path class="star-edge-flow" data-edge="dim_product:fact_order_items" d="M 192 350 C 262 350, 248 112, 295 112"/>
+          </g>
+
+          <g class="star-node" data-g="dim_date" onclick="selectGold('dim_date')" onmouseenter="selectGold('dim_date')" filter="url(#card-sh)">
+            <rect class="node-bg" x="18" y="36" width="174" height="68" rx="12" fill="var(--surface)" stroke="var(--teal)"/>
+            <rect x="28" y="45" width="44" height="17" rx="8" fill="var(--teal-soft)"/>
+            <text x="50" y="57" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--teal)">DIM</text>
+            <text x="28" y="79" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.dim_date</text>
+            <text x="28" y="95" text-anchor="start" font-size="10" fill="var(--ink-muted)">Calendar 2016–2020</text>
+          </g>
+          <g class="star-node" data-g="dim_customer" onclick="selectGold('dim_customer')" onmouseenter="selectGold('dim_customer')" filter="url(#card-sh)">
+            <rect class="node-bg" x="18" y="128" width="174" height="68" rx="12" fill="var(--surface)" stroke="var(--teal)"/>
+            <rect x="28" y="137" width="44" height="17" rx="8" fill="var(--teal-soft)"/>
+            <text x="50" y="149" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--teal)">DIM</text>
+            <text x="28" y="171" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.dim_customer</text>
+            <text x="28" y="187" text-anchor="start" font-size="10" fill="var(--ink-muted)">Customers + Geo</text>
+          </g>
+          <g class="star-node" data-g="dim_seller" onclick="selectGold('dim_seller')" onmouseenter="selectGold('dim_seller')" filter="url(#card-sh)">
+            <rect class="node-bg" x="18" y="220" width="174" height="68" rx="12" fill="var(--surface)" stroke="var(--teal)"/>
+            <rect x="28" y="229" width="44" height="17" rx="8" fill="var(--teal-soft)"/>
+            <text x="50" y="241" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--teal)">DIM</text>
+            <text x="28" y="263" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.dim_seller</text>
+            <text x="28" y="279" text-anchor="start" font-size="10" fill="var(--ink-muted)">Sellers + Geo + Deal</text>
+          </g>
+          <g class="star-node" data-g="dim_product" onclick="selectGold('dim_product')" onmouseenter="selectGold('dim_product')" filter="url(#card-sh)">
+            <rect class="node-bg" x="18" y="312" width="174" height="68" rx="12" fill="var(--surface)" stroke="var(--teal)"/>
+            <rect x="28" y="321" width="44" height="17" rx="8" fill="var(--teal-soft)"/>
+            <text x="50" y="333" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--teal)">DIM</text>
+            <text x="28" y="355" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.dim_product</text>
+            <text x="28" y="371" text-anchor="start" font-size="10" fill="var(--ink-muted)">Products + EN Trans</text>
+          </g>
+
+          <g class="star-node active" data-g="fact_order_items" onclick="selectGold('fact_order_items')" onmouseenter="selectGold('fact_order_items')" filter="url(#card-sh)">
+            <rect class="node-bg" x="295" y="46" width="215" height="78" rx="12" fill="var(--surface)" stroke="var(--cobalt)"/>
+            <rect x="307" y="55" width="76" height="17" rx="8" fill="var(--cobalt-soft)"/>
+            <text x="345" y="67" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--cobalt)">REVENUE FACT</text>
+            <text x="307" y="90" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.fact_order_items</text>
+            <text x="307" y="108" text-anchor="start" font-size="10" fill="var(--ink-muted)">112,650 rows · R$ 13.59M</text>
+          </g>
+          <g class="star-node" data-g="fact_orders" onclick="selectGold('fact_orders')" onmouseenter="selectGold('fact_orders')" filter="url(#card-sh)">
+            <rect class="node-bg" x="295" y="142" width="215" height="78" rx="12" fill="var(--surface)" stroke="var(--cobalt)"/>
+            <rect x="307" y="151" width="70" height="17" rx="8" fill="var(--cobalt-soft)"/>
+            <text x="342" y="163" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--cobalt)">ORDER FACT</text>
+            <text x="307" y="186" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.fact_orders</text>
+            <text x="307" y="204" text-anchor="start" font-size="10" fill="var(--ink-muted)">99,441 rows · SLA &amp; Status</text>
+          </g>
+          <g class="star-node" data-g="fact_payments" onclick="selectGold('fact_payments')" onmouseenter="selectGold('fact_payments')" filter="url(#card-sh)">
+            <rect class="node-bg" x="295" y="238" width="215" height="78" rx="12" fill="var(--surface)" stroke="var(--amber)"/>
+            <rect x="307" y="247" width="84" height="17" rx="8" fill="var(--amber-soft)"/>
+            <text x="349" y="259" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--amber)">PAYMENT FACT</text>
+            <text x="307" y="282" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.fact_payments</text>
+            <text x="307" y="300" text-anchor="start" font-size="10" fill="var(--ink-muted)">103,886 rows · R$ 16.01M</text>
+          </g>
+          <g class="star-node" data-g="fact_reviews" onclick="selectGold('fact_reviews')" onmouseenter="selectGold('fact_reviews')" filter="url(#card-sh)">
+            <rect class="node-bg" x="550" y="92" width="212" height="82" rx="12" fill="var(--surface)" stroke="var(--crimson)"/>
+            <rect x="562" y="101" width="84" height="17" rx="8" fill="var(--crimson-soft)"/>
+            <text x="604" y="113" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--crimson)">SENTIMENT FACT</text>
+            <text x="562" y="136" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.fact_reviews</text>
+            <text x="562" y="155" text-anchor="start" font-size="10" fill="var(--ink-muted)">99,224 rows (MongoDB)</text>
+          </g>
+          <g class="star-node" data-g="fact_marketing_funnel" onclick="selectGold('fact_marketing_funnel')" onmouseenter="selectGold('fact_marketing_funnel')" filter="url(#card-sh)">
+            <rect class="node-bg" x="550" y="218" width="212" height="90" rx="12" fill="var(--surface)" stroke="var(--violet)"/>
+            <rect x="562" y="227" width="76" height="17" rx="8" fill="var(--violet-soft)"/>
+            <text x="600" y="239" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--violet)">FUNNEL FACT</text>
+            <text x="562" y="262" text-anchor="start" font-size="12" font-weight="700" fill="var(--ink)">gold.fact_marketing_funnel</text>
+            <text x="562" y="280" text-anchor="start" font-size="10" fill="var(--ink-muted)">8,000 MQLs -&gt; 842 Deals</text>
+            <text x="562" y="295" text-anchor="start" font-size="10" fill="var(--ink-muted)">380 Active Sellers</text>
+          </g>
+        </svg>
+      </div>
+
+      <aside class="card" id="goldInspector" aria-live="polite"></aside>
+    </div>
+  </section>
+
+  <section class="sec" id="kpis">
+    <div class="sec-head">
+      <h2>Executive <span class="mono">Business KPI Catalog</span></h2>
+      <p>Core marketplace formulas, verified baseline benchmarks, and authoritative Gold source tables.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="kpi-card">
+        <span class="badge b-teal">Sales · fact_order_items</span>
+        <h3>GMV &amp; Total Order Value</h3>
+        <div class="kpi-formula mono">GMV = SUM(price) = R$ 13,591,643.70<br>Total = SUM(price + freight) = R$ 15,843,553.24</div>
+        <p style="margin:0;font-size:0.85rem;color:var(--ink-soft);">Measures net merchandise volume sold separately from shipping pass-through revenue.</p>
+      </div>
+      <div class="kpi-card">
+        <span class="badge b-teal">Sales · fact_order_items</span>
+        <h3>Average Order Value (<span class="mono">AOV</span>)</h3>
+        <div class="kpi-formula mono">AOV = Total Order Value / Distinct Orders = R$ 160.58</div>
+        <p style="margin:0;font-size:0.85rem;color:var(--ink-soft);">Tracks basket value (avg 1.14 units/order) and bundle/upsell effectiveness.</p>
+      </div>
+      <div class="kpi-card">
+        <span class="badge b-amber">Logistics · fact_order_items</span>
+        <h3>Freight Ratio</h3>
+        <div class="kpi-formula mono">Freight Ratio = SUM(freight) / SUM(price) = 16.57%</div>
+        <p style="margin:0;font-size:0.85rem;color:var(--ink-soft);">Identifies high-weight categories and long-haul regions where shipping erodes conversion.</p>
+      </div>
+      <div class="kpi-card">
+        <span class="badge b-crimson">Operations · fact_orders + fact_reviews</span>
+        <h3>Delivery SLA &amp; Rating Correlation</h3>
+        <div class="kpi-formula mono">On-Time = 91.89% (4.294★) vs Late = 8.11% (2.566★)</div>
+        <p style="margin:0;font-size:0.85rem;color:var(--ink-soft);">Primary operational KPI: late deliveries drive a -1.73★ collapse in review ratings.</p>
+      </div>
+      <div class="kpi-card">
+        <span class="badge b-cobalt">Growth · dim_customer + fact_orders</span>
+        <h3>Buyer Repeat Rate</h3>
+        <div class="kpi-formula mono">Repeat = Buyers(&gt;1 Order) / Unique Buyers = 3.12%</div>
+        <p style="margin:0;font-size:0.85rem;color:var(--ink-soft);">Shows 96.88% of buyers never return — highlighting loyalty/CRM upside.</p>
+      </div>
+      <div class="kpi-card">
+        <span class="badge b-violet">B2B Growth · fact_marketing_funnel</span>
+        <h3>Seller Conversion &amp; Activation</h3>
+        <div class="kpi-formula mono">MQL→Deal = 10.53% (14d) · Deal→Active = 45.13%</div>
+        <p style="margin:0;font-size:0.85rem;color:var(--ink-soft);">Measures marketing channel ROI and the 462 signed-but-inactive seller onboarding gap.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="marts">
+    <div class="sec-head">
+      <h2>Proposed Executive &amp; Operational <span class="mono">Marts / Views</span></h2>
+      <p>Consumption-ready views designed for <strong>Power BI</strong> (over Fabric Gold) and <strong>ClickHouse Cloud (<span class="mono">dbt-clickhouse</span>)</strong>.</p>
+    </div>
+
+    <div class="grid-3">
+      <div class="mart-card">
+        <div class="card-head"><span class="badge b-teal">Executive</span><span class="mono" style="font-size:0.78rem;">mart_executive_sales_daily</span></div>
+        <h3>Daily &amp; Monthly Sales Rollup</h3>
+        <ul>
+          <li><strong>Sources:</strong> <code>fact_order_items</code> + <code>fact_orders</code> + <code>dim_date</code></li>
+          <li><strong>Answers:</strong> Monthly GMV trajectory, AOV, cancellation rate, and seasonality peaks.</li>
+        </ul>
+      </div>
+      <div class="mart-card">
+        <div class="card-head"><span class="badge b-crimson">Operations</span><span class="mono" style="font-size:0.78rem;">mart_logistics_sla_impact</span></div>
+        <h3>Carrier SLA &amp; Review Impact</h3>
+        <ul>
+          <li><strong>Sources:</strong> <code>fact_orders</code> + <code>fact_reviews</code> + <code>dim_customer</code> + <code>dim_seller</code></li>
+          <li><strong>Answers:</strong> Which state corridors miss SLA most often and trigger 1★ reviews?</li>
+        </ul>
+      </div>
+      <div class="mart-card">
+        <div class="card-head"><span class="badge b-cobalt">Retention</span><span class="mono" style="font-size:0.78rem;">mart_customer_rfm_retention</span></div>
+        <h3>RFM Segmentation &amp; Repeat Buyers</h3>
+        <ul>
+          <li><strong>Sources:</strong> <code>dim_customer</code> + <code>fact_orders</code> + <code>fact_order_items</code></li>
+          <li><strong>Answers:</strong> Who are the 2,997 repeat buyers and which categories drive second orders?</li>
+        </ul>
+      </div>
+      <div class="mart-card">
+        <div class="card-head"><span class="badge b-amber">Merchandising</span><span class="mono" style="font-size:0.78rem;">mart_product_category_perf</span></div>
+        <h3>Category Revenue &amp; Freight Burden</h3>
+        <ul>
+          <li><strong>Sources:</strong> <code>fact_order_items</code> + <code>dim_product</code> + <code>fact_reviews</code> (pre-agg)</li>
+          <li><strong>Answers:</strong> Top GMV categories, photo-count lift, and high-freight SKUs.</li>
+        </ul>
+      </div>
+      <div class="mart-card">
+        <div class="card-head"><span class="badge b-amber">Finance</span><span class="mono" style="font-size:0.78rem;">mart_payment_reconciliation</span></div>
+        <h3>Payments, Installments &amp; Recon</h3>
+        <ul>
+          <li><strong>Sources:</strong> <code>fact_payments</code> + <code>fact_orders</code> + <code>dim_date</code></li>
+          <li><strong>Answers:</strong> Credit installment mix, Boleto share, and the 775 paid/canceled orders (R$ 162.6K).</li>
+        </ul>
+      </div>
+      <div class="mart-card">
+        <div class="card-head"><span class="badge b-violet">B2B Growth</span><span class="mono" style="font-size:0.78rem;">mart_seller_acquisition_funnel</span></div>
+        <h3>Seller Onboarding &amp; Channel ROI</h3>
+        <ul>
+          <li><strong>Sources:</strong> <code>fact_marketing_funnel</code> + <code>dim_seller</code> + <code>fact_order_items</code></li>
+          <li><strong>Answers:</strong> Organic vs Paid MQL ROI, SDR/SR velocity, and activating the 462 idle sellers.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Business &amp; Gold Blueprint — Retail Lakehouse Platform (26 Nov 2026)</span>
+    <span>Local Interactive Portal inside <span class="mono">readonly_assessment/</span> (Excluded from Git)</span>
+  </footer>
+
+</main>
+
+<script>
+  const TABLES_DICT = [{"id": "orders", "name": "silver.orders", "domain": "sales", "domain_lbl": "Sales & Orders", "source": "SQL Server", "rows": "99,441", "pk": "order_id", "grain": "One order per row (Order Header)", "business_role": "The operational backbone of the order lifecycle: records purchase time, payment approval, handoff to carrier, actual customer delivery, and promised ETA.", "silver_fixes": "Fixed lpad(5) status truncation, preserved all 5 dates as native TIMESTAMP, and added 23 chronology anomaly + 7,826 late-delivery SLA flags.", "columns": [["order_id", "STRING (PK)", "Unique order identifier linking items, payments, and customer reviews."], ["customer_id", "STRING (FK)", "Order-specific customer key linking to silver.customers."], ["order_status", "STRING", "Lifecycle state (delivered 97.02%, shipped, canceled, unavailable, invoiced...)."], ["order_purchase_timestamp", "TIMESTAMP", "Exact timestamp when the customer placed the order (SLA start)."], ["order_approved_at", "TIMESTAMP", "Timestamp when payment cleared and the order was approved."], ["order_delivered_carrier_date", "TIMESTAMP", "Timestamp when the seller handed the parcel to the logistics carrier."], ["order_delivered_customer_date", "TIMESTAMP", "Actual timestamp when the customer received the shipment."], ["order_estimated_delivery_date", "TIMESTAMP", "Promised delivery date shown at checkout (SLA baseline)."], ["is_late_delivery (Silver)", "BOOLEAN", "True when actual delivery exceeded estimated ETA (7,826 late orders)."], ["has_chronology_anomaly (Silver)", "BOOLEAN", "Flags 23 rows with inverted timestamps (e.g., delivered < carrier handoff)."]]}, {"id": "order_items", "name": "silver.order_items", "domain": "sales", "domain_lbl": "Sales & Orders", "source": "SQL Server", "rows": "112,650", "pk": "(order_id, order_item_id)", "grain": "One product line item per order (Order Line)", "business_role": "The primary financial revenue source: drives GMV (R$ 13.59M), freight revenue (R$ 2.25M), and links every unit sold to its product and seller.", "silver_fixes": "Enforced DECIMAL(12,2), computed line_total_amount, flagged 383 free-shipping lines, and flagged 4 year-2020 shipping_limit_date outliers.", "columns": [["order_id", "STRING (PK/FK)", "Parent order identifier."], ["order_item_id", "INT (PK)", "Sequential line number within the order (1, 2, 3...; avg 1.14 items/order)."], ["product_id", "STRING (FK)", "Sold SKU identifier linking to silver.products."], ["seller_id", "STRING (FK)", "Fulfilling merchant identifier linking to silver.sellers."], ["shipping_limit_date", "TIMESTAMP", "Seller dispatch deadline before SLA breach."], ["price", "DECIMAL(12,2)", "Item price excluding freight (Total GMV = 13,591,643.70)."], ["freight_value", "DECIMAL(12,2)", "Allocated shipping fee for this item (Total = 2,251,909.54)."], ["line_total_amount (Silver)", "DECIMAL(12,2)", "Computed line total = price + freight_value (15,843,553.24)."], ["is_free_shipping (Silver)", "BOOLEAN", "Flags free-shipping items where freight_value = 0 (383 rows)."]]}, {"id": "order_payments", "name": "silver.order_payments", "domain": "sales", "domain_lbl": "Sales & Orders", "source": "SQL Server", "rows": "103,886", "pk": "(order_id, payment_sequential)", "grain": "One payment instrument / attempt per order", "business_role": "Captures Brazilian payment behavior: credit cards with installments (78.34%), cash Boleto vouchers (17.92%), and multi-voucher split checkout.", "silver_fixes": "Fixed grain-collapse bug that dropped 4,446 split payments, replaced float with DECIMAL(12,2), and preserved 9 zero-value + 2 zero-installment rows with flags.", "columns": [["order_id", "STRING (PK/FK)", "Order identifier (0 orphan rows vs silver.orders)."], ["payment_sequential", "INT (PK)", "Payment attempt/split sequence (up to 29 payments on a single order!)."], ["payment_type", "STRING", "Instrument: credit_card, boleto, voucher, debit_card, or not_defined (3)."], ["payment_installments", "INT", "Selected installments (credit card avg 3.51, max 24)."], ["payment_value", "DECIMAL(12,2)", "Amount collected on this instrument (Total = 16,008,872.12)."], ["is_multi_payment_order (Silver)", "BOOLEAN", "Flags the 2,961 orders paid across multiple instruments/vouchers."], ["is_zero_value_payment (Silver)", "BOOLEAN", "Flags the 9 zero-amount rows (6 voucher + 3 not_defined)."]]}, {"id": "order_reviews", "name": "silver.order_reviews", "domain": "sales", "domain_lbl": "Sales & Orders", "source": "MongoDB 8.3 (BSON)", "rows": "99,224", "pk": "(review_id, order_id)", "grain": "One customer review per order", "business_role": "Post-delivery satisfaction pulse (avg 4.086/5 stars; 41.27% include written feedback), exposing the -1.73★ score crash when shipments arrive late.", "silver_fixes": "Flattened nested MongoDB BSON (comment.*, timestamps.*, source_lineage.*) and isolated Gold grain to prevent the +664-row (+R$ 72.3k) revenue fan-out trap.", "columns": [["review_id", "STRING (PK)", "Review identifier (composite PK with order_id handles shared multi-order surveys)."], ["order_id", "STRING (PK/FK)", "Reviewed order identifier."], ["review_score", "INT", "Customer rating 1–5 stars (57.78% are 5★; 11.51% are 1★)."], ["review_comment_title", "STRING", "Optional headline extracted from MongoDB comment.title."], ["review_comment_message", "STRING", "Multiline customer comment (present in 41.27% of reviews)."], ["review_creation_date", "TIMESTAMP", "Date the satisfaction survey was sent."], ["review_answer_timestamp", "TIMESTAMP", "Timestamp when the customer submitted the review."], ["is_negative_review (Silver)", "BOOLEAN", "True for 1★ or 2★ reviews (14,575 total)."], ["review_response_hours (Silver)", "DOUBLE", "Hours elapsed between survey send and customer response."]]}, {"id": "customers", "name": "silver.customers", "domain": "actors", "domain_lbl": "Customers, Sellers & Geo", "source": "SQL Server", "rows": "99,441", "pk": "customer_id", "grain": "Order-level customer key (one row per order)", "business_role": "Separates per-order customer_id (99,441 rows) from customer_unique_id (96,096 real people — revealing 93,099 one-time buyers and 2,997 repeat buyers = 3.12%).", "silver_fixes": "Standardized 4,119 city names, verified 0 state mismatches, and documented 278 rows missing a geolocation ZIP match (LEFT JOIN required).", "columns": [["customer_id", "STRING (PK)", "Order-level key joining to silver.orders (regenerated per order)."], ["customer_unique_id", "STRING", "True persistent person ID used for repeat-purchase rate & RFM."], ["customer_zip_code_prefix", "STRING (5)", "5-digit Brazilian ZIP prefix for geospatial mapping."], ["customer_city", "STRING", "Normalized customer city name."], ["customer_state", "STRING (2)", "2-letter Brazilian state code (SP represents 42.0% of all orders)."]]}, {"id": "sellers", "name": "silver.sellers", "domain": "actors", "domain_lbl": "Customers, Sellers & Geo", "source": "SQL Server", "rows": "3,095", "pk": "seller_id", "grain": "One active marketplace seller per row", "business_role": "Represents the active merchant network fulfilling orders on Olist; 59.7% of sellers operate out of São Paulo state (SP).", "silver_fixes": "Cleaned 2 corrupted city values (ZIP/email leaked into city), standardized accents, and flagged 35 state mismatches vs geolocation.", "columns": [["seller_id", "STRING (PK)", "Unique seller identifier linking order_items and closed_deals."], ["seller_zip_code_prefix", "STRING (5)", "Seller warehouse ZIP prefix (enables seller-to-buyer distance analysis)."], ["seller_city", "STRING", "Cleaned merchant city."], ["seller_state", "STRING (2)", "Merchant state (SP: 1,849, PR: 349, MG: 244)."]]}, {"id": "geolocation", "name": "silver.geolocation_zip_reference", "domain": "actors", "domain_lbl": "Customers, Sellers & Geo", "source": "SQL Server", "rows": "19,015 (of 1,000,163)", "pk": "geolocation_zip_code_prefix", "grain": "One deduplicated 1:1 ZIP centroid", "business_role": "Provides verified Brazil lat/lng coordinates for maps and shipping-distance analysis without M:N row explosions.", "silver_fixes": "Quarantined 29 out-of-Brazil coordinates, removed 279,668 duplicates, and aggregated to 1:1 ZIP centroids preventing the 435,094-row M:N explosion.", "columns": [["geolocation_zip_code_prefix", "STRING (PK)", "Unique 5-digit ZIP code prefix."], ["geolocation_lat", "DOUBLE", "Verified Brazil-bounded centroid latitude."], ["geolocation_lng", "DOUBLE", "Verified Brazil-bounded centroid longitude."], ["geolocation_city", "STRING", "Canonical city name for the ZIP prefix."], ["geolocation_state", "STRING (2)", "Canonical state code for the ZIP prefix."]]}, {"id": "products", "name": "silver.products", "domain": "catalog", "domain_lbl": "Products & Catalog", "source": "SQL Server", "rows": "32,951", "pk": "product_id", "grain": "One SKU / product per row", "business_role": "Product catalog holding physical dimensions & weight (key drivers of freight cost), category tags (73 categories), and listing photo/description depth.", "silver_fixes": "Fixed source typos (lenght->length), preserved 610 missing categories as NULL + flag, and nulled 4 zero-weight + 2 null-dimension anomalies.", "columns": [["product_id", "STRING (PK)", "Unique SKU identifier."], ["product_category_name", "STRING", "Portuguese category name (73 categories; 610 NULLs flagged cleanly)."], ["product_name_length", "INT", "Title character count (listing quality signal)."], ["product_description_length", "INT", "Description character count."], ["product_photos_qty", "INT", "Number of product gallery photos."], ["product_weight_g", "DECIMAL(12,2)", "Product weight in grams (key freight driver)."], ["product_length/height/width_cm", "DECIMAL(12,2)", "Package dimensions in cm for volumetric shipping."], ["is_missing_category (Silver)", "BOOLEAN", "True for the 610 uncategorized products."]]}, {"id": "translation", "name": "silver.product_category_name_translation", "domain": "catalog", "domain_lbl": "Products & Catalog", "source": "SQL Server", "rows": "71", "pk": "product_category_name", "grain": "One category translation pair per row", "business_role": "Maps Portuguese category names to English labels so ClickHouse and Power BI dashboards are accessible globally.", "silver_fixes": "Trimmed keys and documented the 2 missing categories relative to products (pc_gamer & portateis_cozinha) so dim_product handles 73/73 cleanly.", "columns": [["product_category_name", "STRING (PK)", "Portuguese category key matching silver.products."], ["product_category_name_english", "STRING", "English category label (e.g., health_beauty, watches_gifts)."]]}, {"id": "mql", "name": "silver.marketing_qualified_leads", "domain": "marketing", "domain_lbl": "B2B Seller Funnel", "source": "SQL Server", "rows": "8,000", "pk": "mql_id", "grain": "One prospective B2B seller lead per row", "business_role": "Top of the B2B seller acquisition funnel: tracks every prospective merchant who inquired about selling on Olist and which marketing channel brought them.", "silver_fixes": "Typed first_contact_date as DATE and unified 1,159 unattributed leads (60 NULL + 1,099 unknown) under is_unknown_origin.", "columns": [["mql_id", "STRING (PK)", "Unique prospective merchant lead ID."], ["first_contact_date", "DATE", "Date the merchant submitted their onboarding inquiry."], ["landing_page_id", "STRING", "Marketing landing page identifier (495 distinct pages)."], ["origin", "STRING", "Acquisition channel (organic_search 2,296, paid_search 1,586, social 1,350...)."], ["is_unknown_origin (Silver)", "BOOLEAN", "Flags 1,159 leads without an attributed marketing channel."]]}, {"id": "closed_deals", "name": "silver.closed_deals", "domain": "marketing", "domain_lbl": "B2B Seller Funnel", "source": "SQL Server", "rows": "842", "pk": "mql_id", "grain": "One signed B2B seller contract per row", "business_role": "Bottom of the B2B funnel (10.53% MQL conversion, 14-day median close): connects sales contracts to store orders via seller_id, showing 380 active vs 462 unactivated sellers.", "silver_fixes": "Verified 0 orphans vs MQL, computed lead_conversion_days, flagged 1 row with won < first_contact, and added is_active_seller_in_store.", "columns": [["mql_id", "STRING (PK/FK)", "Links 1:1 to silver.marketing_qualified_leads."], ["seller_id", "STRING (UQ)", "Assigned marketplace seller ID (380 in sellers; 462 pending first order)."], ["sdr_id / sr_id", "STRING", "Sales Development & Sales Representative IDs."], ["won_date", "TIMESTAMP", "Contract signature timestamp."], ["business_segment", "STRING", "Seller vertical (home_decor 105, health_beauty 93, car_accessories 77...)."], ["lead_type / business_type", "STRING", "Merchant profile (online_medium, manufacturer, reseller...)."], ["average_stock / declared_monthly_revenue", "STRING / DECIMAL", "Inventory tier bucket and declared monthly revenue."], ["is_active_seller_in_store (Silver)", "BOOLEAN", "True if the signed seller has fulfilled >=1 order (380 True / 462 False)."]]}];
+  const GOLD_TABLES = {"dim_date": {"type": "Dimension", "grain": "One calendar day (2016-01-01 .. 2020-12-31)", "sources": ["Generated Calendar (Spark SQL)"], "desc": "Shared calendar dimension unifying purchase, approval, delivery, review, and B2B deal dates for consistent Power BI time filtering."}, "dim_customer": {"type": "Dimension (SCD1)", "grain": "One customer_id + Unknown (-1) member", "sources": ["silver.customers", "silver.geolocation_zip_reference (LEFT JOIN)"], "desc": "Combines buyer attributes with lat/lng, city, and state (preserving the 278 rows without ZIP match) while retaining customer_unique_id for repeat-rate analysis."}, "dim_seller": {"type": "Dimension (SCD1)", "grain": "One seller_id + Unknown (-1) member", "sources": ["silver.sellers", "silver.geolocation_zip_reference", "silver.closed_deals (LEFT JOIN)"], "desc": "Enriches each merchant with warehouse coordinates and B2B onboarding segment, eliminating Snowflake & Ambiguous Paths in Power BI."}, "dim_product": {"type": "Dimension (SCD1)", "grain": "One product_id + Unknown (-1) member", "sources": ["silver.products", "silver.product_category_name_translation (LEFT JOIN)"], "desc": "Conformed SKU catalog with full English/Portuguese category coverage (73/73), physical weight/dimensions, and clean handling of the 610 uncategorized SKUs."}, "fact_order_items": {"type": "Core Revenue Fact", "grain": "(order_id, order_item_id) — 112,650 rows", "sources": ["silver.order_items", "silver.orders (status & purchase_date)"], "desc": "Primary revenue fact table (GMV R$ 13.59M, Freight R$ 2.25M) directly linked to dim_product, dim_seller, dim_customer, and dim_date."}, "fact_orders": {"type": "Order & SLA Fact", "grain": "One order_id — 99,441 rows", "sources": ["silver.orders", "Aggregated order_items summary"], "desc": "Tracks order statuses (97.02% delivered), delivery duration (12.6d avg), and SLA breach flags (7,826 late) at pure order grain."}, "fact_payments": {"type": "Payments Fact", "grain": "(order_id, payment_sequential) — 103,886 rows", "sources": ["silver.order_payments", "silver.orders (status & date)"], "desc": "Tracks cash collections (R$ 16.01M), payment mix (78.34% credit card, 17.92% Boleto), installments, and the 775 paid orders lacking order_items."}, "fact_reviews": {"type": "Customer Sentiment Fact", "grain": "(review_id, order_id) — 99,224 rows", "sources": ["silver.order_reviews (MongoDB)", "silver.orders (is_late_delivery)"], "desc": "Isolates review grain from line items to prevent the +R$ 72,319.08 phantom revenue trap while preserving the 4.294★ vs 2.566★ SLA correlation."}, "fact_marketing_funnel": {"type": "B2B Acquisition Fact", "grain": "One mql_id — 8,000 rows", "sources": ["silver.marketing_qualified_leads", "silver.closed_deals (LEFT JOIN)"], "desc": "Tracks the B2B seller pipeline from lead capture (8,000 MQLs) to contract signature (842 = 10.53%) and active store sales (380 = 45.13%)."}};
+  const GOLD_EDGES = {
+    dim_date: ["fact_order_items", "fact_orders", "fact_payments", "fact_reviews", "fact_marketing_funnel"],
+    dim_customer: ["fact_order_items", "fact_orders", "fact_payments", "fact_reviews"],
+    dim_seller: ["fact_order_items", "fact_marketing_funnel"],
+    dim_product: ["fact_order_items"],
+    fact_order_items: ["dim_date", "dim_customer", "dim_seller", "dim_product"],
+    fact_orders: ["dim_date", "dim_customer"],
+    fact_payments: ["dim_date", "dim_customer"],
+    fact_reviews: ["dim_date", "dim_customer"],
+    fact_marketing_funnel: ["dim_date", "dim_seller"]
+  };
+  let dictDomain = "all";
+  let selectedTable = "orders";
+  let starAllFlow = false;
+
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute("data-theme") === "dark";
+    html.setAttribute("data-theme", isDark ? "light" : "dark");
+    document.getElementById("themeBtn").textContent = isDark ? "Dark Mode" : "Light Mode";
+  }
+
+  function toggleStarFlow() {
+    starAllFlow = !starAllFlow;
+    document.getElementById("starCanvasWrap").classList.toggle("star-all-flow", starAllFlow);
+    document.getElementById("starFlowBtn").textContent = starAllFlow ? "Stop Full Animation" : "Animate All Flows";
+  }
+
+  function filterDict(dom, btn) {
+    dictDomain = dom;
+    document.querySelectorAll("#dictPills .pill").forEach(b => b.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+    renderDictList();
+  }
+
+  function renderDictList() {
+    const q = (document.getElementById("dictSearch").value || "").trim().toLowerCase();
+    const list = TABLES_DICT.filter(t => {
+      if (dictDomain !== "all" && t.domain !== dictDomain) return false;
+      if (!q) return true;
+      const colStr = t.columns.map(c => c.join(" ")).join(" ");
+      return (`${t.name} ${t.domain_lbl} ${t.business_role} ${t.silver_fixes} ${colStr}`).toLowerCase().includes(q);
+    });
+    const el = document.getElementById("dictList");
+    if (!list.length) {
+      el.innerHTML = `<div class="card" style="text-align:center;color:var(--ink-muted);">No matching tables or columns found.</div>`;
+      return;
+    }
+    if (!list.some(x => x.id === selectedTable)) selectedTable = list[0].id;
+    el.innerHTML = list.map(t => `
+      <button class="tbl-btn ${t.id === selectedTable ? 'active' : ''}" onclick="selectDictTable('${t.id}')">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;width:100%;">
+          <strong class="mono" style="font-size:0.83rem;overflow-wrap:anywhere;word-break:break-word;">${esc(t.name)}</strong>
+          <span class="badge ${t.source.includes('MongoDB') ? 'b-cobalt' : 'b-teal'}">${esc(t.rows.split(' ')[0])}</span>
+        </div>
+        <span style="font-size:0.78rem;color:var(--ink-muted);">${esc(t.domain_lbl)} · ${esc(t.source)}</span>
+      </button>
+    `).join("");
+    renderDictDetail();
+  }
+
+  function selectDictTable(id) {
+    selectedTable = id;
+    renderDictList();
+  }
+
+  function renderDictDetail() {
+    const t = TABLES_DICT.find(x => x.id === selectedTable);
+    if (!t) return;
+    document.getElementById("dictDetail").innerHTML = `
+      <div>
+        <span class="badge b-teal">${esc(t.domain_lbl)} · ${esc(t.source)}</span>
+        <h3 class="mono" style="margin:8px 0 4px;font-size:1.25rem;">${esc(t.name)}</h3>
+        <div style="font-size:0.85rem;color:var(--ink-muted);"><strong>Grain:</strong> ${esc(t.grain)} &nbsp;|&nbsp; <strong>PK:</strong> <span class="mono">${esc(t.pk)}</span> &nbsp;|&nbsp; <strong>Rows:</strong> <span class="mono">${esc(t.rows)}</span></div>
+      </div>
+      <div style="margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--surface-alt);border:1px solid var(--line);font-size:0.9rem;">
+        <strong>Business Role:</strong> ${esc(t.business_role)}
+      </div>
+      <div style="margin-top:10px;padding:10px 14px;border-radius:12px;background:var(--teal-soft);border:1px solid var(--teal);font-size:0.86rem;">
+        <strong>Verified Silver Cleaning:</strong> ${esc(t.silver_fixes)}
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="col-tbl">
+          <thead><tr><th>Column</th><th>Type</th><th>Business Meaning &amp; Usage</th></tr></thead>
+          <tbody>
+            ${t.columns.map(c => `<tr><td class="mono" style="font-weight:600;">${esc(c[0])}</td><td class="mono" style="font-size:0.78rem;color:var(--cobalt);">${esc(c[1])}</td><td>${esc(c[2])}</td></tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  function selectGold(key) {
+    const g = GOLD_TABLES[key];
+    if (!g) return;
+    const neighbors = new Set(GOLD_EDGES[key] || []);
+    document.querySelectorAll(".star-node").forEach(n => {
+      const nk = n.dataset.g;
+      n.classList.toggle("active", nk === key);
+      n.classList.toggle("connected", nk !== key && neighbors.has(nk));
+      n.classList.toggle("dimmed", nk !== key && !neighbors.has(nk));
+    });
+    document.querySelectorAll("#starEdges .star-edge, #starEdges .star-edge-flow").forEach(edge => {
+      const [a, b] = (edge.dataset.edge || "").split(":");
+      const isLit = (a === key && neighbors.has(b)) || (b === key && neighbors.has(a));
+      edge.classList.toggle("lit", isLit);
+    });
+    const connBtns = (GOLD_EDGES[key] || []).map(c =>
+      `<button class="pill" style="font-size:0.76rem;padding:4px 10px;" onclick="selectGold('${c}')">gold.${esc(c)}</button>`
+    ).join("");
+    document.getElementById("goldInspector").innerHTML = `
+      <div>
+        <span class="badge ${g.type.includes('Dim') ? 'b-teal' : 'b-cobalt'}">${esc(g.type)}</span>
+        <h3 class="mono" style="margin:10px 0 6px;font-size:1.22rem;">gold.${esc(key)}</h3>
+        <div style="font-size:0.85rem;color:var(--ink-muted);margin-bottom:12px;"><strong>Grain:</strong> ${esc(g.grain)}</div>
+        <p style="margin:0 0 14px;font-size:0.92rem;color:var(--ink-soft);">${esc(g.desc)}</p>
+        <div style="background:var(--surface-alt);border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px;">
+          <strong style="font-size:0.84rem;display:block;margin-bottom:6px;">Silver Sources:</strong>
+          <ul style="margin:0;padding-left:18px;font-size:0.84rem;">
+            ${g.sources.map(s => `<li class="mono">${esc(s)}</li>`).join("")}
+          </ul>
+        </div>
+        <div>
+          <strong style="font-size:0.84rem;display:block;margin-bottom:6px;">Directly Connected (${(GOLD_EDGES[key] || []).length}):</strong>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">${connBtns}</div>
+        </div>
+      </div>
+      <div style="font-size:0.8rem;color:var(--ink-muted);border-top:1px solid var(--line);padding-top:10px;margin-top:auto;">
+        Tip: Hover or click any node to illuminate its relationships and flow, or click &ldquo;Animate All Flows&rdquo;.
+      </div>
+    `;
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    renderDictList();
+    selectGold("fact_order_items");
+  });
+</script>
+</body>
+</html>
