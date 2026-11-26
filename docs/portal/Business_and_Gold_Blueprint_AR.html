@@ -222,6 +222,35 @@
     stroke-width: 3;
     filter: drop-shadow(0 6px 14px rgba(15, 118, 110, 0.30));
   }
+  .star-node.merged-out { opacity: 0.24; }
+  .star-node.merged-out rect.node-bg { stroke-dasharray: 5 4; }
+  .star-edge.merged-out, .star-edge-flow.merged-out { opacity: 0.08 !important; }
+  .star-mode-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+  .star-mode-btn {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
+    padding: 11px 14px; border-radius: 12px; border: 1.5px solid var(--line-strong);
+    background: var(--surface); color: var(--ink); cursor: pointer;
+    transition: all 0.18s ease; text-align: right; flex: 1; min-width: 210px;
+  }
+  .star-mode-btn:hover { border-color: var(--teal); transform: translateY(-1px); }
+  .star-mode-btn.active { border-color: var(--teal); background: var(--teal-soft); box-shadow: 0 4px 12px rgba(15,118,110,0.12); }
+  .star-mode-explain {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px 18px; margin-bottom: 18px; box-shadow: var(--shadow);
+  }
+  .star-mode-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 12px; }
+  @media (max-width: 860px) { .star-mode-cols { grid-template-columns: 1fr; } }
+  .star-mode-col { background: var(--surface-alt); border: 1px solid var(--line); border-radius: 10px; padding: 11px 13px; font-size: 0.84rem; }
+  .star-mode-col ul { margin: 6px 0 0; padding-right: 18px; display: grid; gap: 4px; color: var(--ink-soft); }
+  .star-map-box {
+    margin-top: 12px; background: var(--surface-alt); border: 1px solid var(--line);
+    border-radius: 10px; padding: 12px 14px; font-size: 0.82rem;
+  }
+  .star-map-grid {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; margin-top: 8px;
+  }
+  @media (max-width: 820px) { .star-map-grid { grid-template-columns: 1fr; } }
+  .star-map-item { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; color: var(--ink-soft); }
   .explainer-box {
     background: var(--surface-alt); border: 1px solid var(--line); border-radius: 12px;
     padding: 13px 15px; font-size: 0.85rem; color: var(--ink-soft); line-height: 1.65;
@@ -514,12 +543,32 @@
       تُخزّن جداول Gold بصيغة <strong>Delta Lake</strong> داخل <strong>Microsoft Fabric Lakehouse</strong> (لربط سلس ومباشر مع Power BI)، وتُبنى باستخدام <strong>SQL صافي عبر خلايا <span class="mono">%%sql</span></strong>، بينما يتولّى <strong><span class="mono">dbt-clickhouse</span></strong> بناء الـ Marts والاختبارات في <strong>ClickHouse Cloud</strong>.
     </div>
 
+    <div class="star-mode-bar" id="starModeBar" role="tablist" aria-label="اختر تصميم Gold Star Schema">
+      <button class="star-mode-btn active" data-mode="5" onclick="setStarMode('5')">
+        <span class="badge b-teal" style="margin-bottom:2px;">الموصى به · Kimball القياسي</span>
+        <strong>التصميم 1: 5 Fact Tables (الأدق 100%)</strong>
+        <span style="font-size:0.78rem;color:var(--ink-muted);">فصل كامل لكل Grain — صفر تضاعف أو فقدان تفاصيل</span>
+      </button>
+      <button class="star-mode-btn" data-mode="3" onclick="setStarMode('3')">
+        <span class="badge b-cobalt" style="margin-bottom:2px;">حل وسط متوازن</span>
+        <strong>التصميم 2: 3 Fact Tables (بسيط وآمن)</strong>
+        <span style="font-size:0.78rem;color:var(--ink-muted);">order_items + orders (مدمج دفع/تقييم) + marketing</span>
+      </button>
+      <button class="star-mode-btn" data-mode="2" onclick="setStarMode('2')">
+        <span class="badge b-amber" style="margin-bottom:2px;">الحد الأدنى الممكن</span>
+        <strong>التصميم 3: 2 Fact Tables (B2C + B2B)</strong>
+        <span style="font-size:0.78rem;color:var(--ink-muted);">fact_sales + fact_marketing_funnel (مع تحذيرات DAX)</span>
+      </button>
+    </div>
+
+    <div class="star-mode-explain" id="starModeExplain" aria-live="polite"></div>
+
     <div class="star-layout">
       <div class="star-canvas-wrap" id="starCanvasWrap">
         <div class="star-toolbar">
           <div class="star-legend">
             <span class="badge b-teal">4 Dimensions (SCD1)</span>
-            <span class="badge b-cobalt">5 Isolated Facts</span>
+            <span class="badge b-cobalt" id="starFactsBadge">5 Isolated Facts</span>
             <span>مرّر الماوس أو اضغط على أي جدول لتشغيل مسار علاقاته</span>
           </div>
           <button class="btn btn-primary" id="starFlowBtn" onclick="toggleStarFlow()">تشغيل حركة كل العلاقات</button>
@@ -536,117 +585,203 @@
           </defs>
 
           <text x="108" y="20" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--teal)">CONFORMED DIMENSIONS (4)</text>
-          <text x="530" y="20" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--cobalt)">GRAIN-ISOLATED FACT TABLES (5)</text>
+          <text id="starFactsHeader" x="530" y="20" text-anchor="middle" font-size="11.5" font-weight="700" fill="var(--cobalt)">GRAIN-ISOLATED FACT TABLES (5)</text>
 
-          <!-- Smooth Curved Cubic-Bezier Connectors (base + animated flow layer) -->
-          <g id="starEdges">
-            <!-- dim_date -> 5 facts -->
-            <path class="star-edge" data-edge="dim_date:fact_order_items" d="M 192 66 C 242 66, 248 70, 295 70"/>
-            <path class="star-edge-flow" data-edge="dim_date:fact_order_items" d="M 192 66 C 242 66, 248 70, 295 70"/>
+          <g id="starLayer5">
+            <!-- Smooth Curved Cubic-Bezier Connectors (base + animated flow layer) -->
+            <g class="star-edges-grp">
+              <!-- dim_date -> 5 facts -->
+              <path class="star-edge" data-edge="dim_date:fact_order_items" d="M 192 66 C 242 66, 248 70, 295 70"/>
+              <path class="star-edge-flow" data-edge="dim_date:fact_order_items" d="M 192 66 C 242 66, 248 70, 295 70"/>
 
-            <path class="star-edge" data-edge="dim_date:fact_orders" d="M 192 72 C 250 72, 245 162, 295 162"/>
-            <path class="star-edge-flow" data-edge="dim_date:fact_orders" d="M 192 72 C 250 72, 245 162, 295 162"/>
+              <path class="star-edge" data-edge="dim_date:fact_orders" d="M 192 72 C 250 72, 245 162, 295 162"/>
+              <path class="star-edge-flow" data-edge="dim_date:fact_orders" d="M 192 72 C 250 72, 245 162, 295 162"/>
 
-            <path class="star-edge" data-edge="dim_date:fact_payments" d="M 192 78 C 258 78, 238 256, 295 256"/>
-            <path class="star-edge-flow" data-edge="dim_date:fact_payments" d="M 192 78 C 258 78, 238 256, 295 256"/>
+              <path class="star-edge" data-edge="dim_date:fact_payments" d="M 192 78 C 258 78, 238 256, 295 256"/>
+              <path class="star-edge-flow" data-edge="dim_date:fact_payments" d="M 192 78 C 258 78, 238 256, 295 256"/>
 
-            <path class="star-edge" data-edge="dim_date:fact_reviews" d="M 192 60 C 380 18, 480 42, 550 110"/>
-            <path class="star-edge-flow" data-edge="dim_date:fact_reviews" d="M 192 60 C 380 18, 480 42, 550 110"/>
+              <path class="star-edge" data-edge="dim_date:fact_reviews" d="M 192 60 C 380 18, 480 42, 550 110"/>
+              <path class="star-edge-flow" data-edge="dim_date:fact_reviews" d="M 192 60 C 380 18, 480 42, 550 110"/>
 
-            <path class="star-edge" data-edge="dim_date:fact_marketing_funnel" d="M 192 64 C 410 24, 520 120, 550 245"/>
-            <path class="star-edge-flow" data-edge="dim_date:fact_marketing_funnel" d="M 192 64 C 410 24, 520 120, 550 245"/>
+              <path class="star-edge" data-edge="dim_date:fact_marketing_funnel" d="M 192 64 C 410 24, 520 120, 550 245"/>
+              <path class="star-edge-flow" data-edge="dim_date:fact_marketing_funnel" d="M 192 64 C 410 24, 520 120, 550 245"/>
 
-            <!-- dim_customer -> items, orders, payments, reviews -->
-            <path class="star-edge" data-edge="dim_customer:fact_order_items" d="M 192 152 C 245 152, 245 84, 295 84"/>
-            <path class="star-edge-flow" data-edge="dim_customer:fact_order_items" d="M 192 152 C 245 152, 245 84, 295 84"/>
+              <!-- dim_customer -> items, orders, payments, reviews -->
+              <path class="star-edge" data-edge="dim_customer:fact_order_items" d="M 192 152 C 245 152, 245 84, 295 84"/>
+              <path class="star-edge-flow" data-edge="dim_customer:fact_order_items" d="M 192 152 C 245 152, 245 84, 295 84"/>
 
-            <path class="star-edge" data-edge="dim_customer:fact_orders" d="M 192 162 C 242 162, 248 175, 295 175"/>
-            <path class="star-edge-flow" data-edge="dim_customer:fact_orders" d="M 192 162 C 242 162, 248 175, 295 175"/>
+              <path class="star-edge" data-edge="dim_customer:fact_orders" d="M 192 162 C 242 162, 248 175, 295 175"/>
+              <path class="star-edge-flow" data-edge="dim_customer:fact_orders" d="M 192 162 C 242 162, 248 175, 295 175"/>
 
-            <path class="star-edge" data-edge="dim_customer:fact_payments" d="M 192 172 C 248 172, 245 270, 295 270"/>
-            <path class="star-edge-flow" data-edge="dim_customer:fact_payments" d="M 192 172 C 248 172, 245 270, 295 270"/>
+              <path class="star-edge" data-edge="dim_customer:fact_payments" d="M 192 172 C 248 172, 245 270, 295 270"/>
+              <path class="star-edge-flow" data-edge="dim_customer:fact_payments" d="M 192 172 C 248 172, 245 270, 295 270"/>
 
-            <path class="star-edge" data-edge="dim_customer:fact_reviews" d="M 192 158 C 360 125, 485 130, 550 135"/>
-            <path class="star-edge-flow" data-edge="dim_customer:fact_reviews" d="M 192 158 C 360 125, 485 130, 550 135"/>
+              <path class="star-edge" data-edge="dim_customer:fact_reviews" d="M 192 158 C 360 125, 485 130, 550 135"/>
+              <path class="star-edge-flow" data-edge="dim_customer:fact_reviews" d="M 192 158 C 360 125, 485 130, 550 135"/>
 
-            <!-- dim_seller -> items, marketing_funnel -->
-            <path class="star-edge" data-edge="dim_seller:fact_order_items" d="M 192 248 C 252 248, 242 98, 295 98"/>
-            <path class="star-edge-flow" data-edge="dim_seller:fact_order_items" d="M 192 248 C 252 248, 242 98, 295 98"/>
+              <!-- dim_seller -> items, marketing_funnel -->
+              <path class="star-edge" data-edge="dim_seller:fact_order_items" d="M 192 248 C 252 248, 242 98, 295 98"/>
+              <path class="star-edge-flow" data-edge="dim_seller:fact_order_items" d="M 192 248 C 252 248, 242 98, 295 98"/>
 
-            <path class="star-edge" data-edge="dim_seller:fact_marketing_funnel" d="M 192 260 C 370 355, 495 340, 550 280"/>
-            <path class="star-edge-flow" data-edge="dim_seller:fact_marketing_funnel" d="M 192 260 C 370 355, 495 340, 550 280"/>
+              <path class="star-edge" data-edge="dim_seller:fact_marketing_funnel" d="M 192 260 C 370 355, 495 340, 550 280"/>
+              <path class="star-edge-flow" data-edge="dim_seller:fact_marketing_funnel" d="M 192 260 C 370 355, 495 340, 550 280"/>
 
-            <!-- dim_product -> items -->
-            <path class="star-edge" data-edge="dim_product:fact_order_items" d="M 192 350 C 262 350, 248 112, 295 112"/>
-            <path class="star-edge-flow" data-edge="dim_product:fact_order_items" d="M 192 350 C 262 350, 248 112, 295 112"/>
+              <!-- dim_product -> items -->
+              <path class="star-edge" data-edge="dim_product:fact_order_items" d="M 192 350 C 262 350, 248 112, 295 112"/>
+              <path class="star-edge-flow" data-edge="dim_product:fact_order_items" d="M 192 350 C 262 350, 248 112, 295 112"/>
+            </g>
+
+            <!-- 5 Facts -->
+            <g class="star-node active" data-g="fact_order_items" onclick="selectGold('fact_order_items')" onmouseenter="selectGold('fact_order_items')" filter="url(#card-sh)">
+              <rect class="node-bg" x="295" y="46" width="215" height="78" rx="12" fill="var(--surface)" stroke="var(--cobalt)"/>
+              <rect x="307" y="55" width="76" height="17" rx="8" fill="var(--cobalt-soft)"/>
+              <text x="345" y="67" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--cobalt)">REVENUE FACT</text>
+              <text x="307" y="90" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.fact_order_items</text>
+              <text x="307" y="108" text-anchor="start" font-size="10" fill="var(--ink-muted)">112,650 rows · R$ 13.59M</text>
+            </g>
+            <g class="star-node" data-g="fact_orders" onclick="selectGold('fact_orders')" onmouseenter="selectGold('fact_orders')" filter="url(#card-sh)">
+              <rect class="node-bg" x="295" y="142" width="215" height="78" rx="12" fill="var(--surface)" stroke="var(--cobalt)"/>
+              <rect x="307" y="151" width="70" height="17" rx="8" fill="var(--cobalt-soft)"/>
+              <text x="342" y="163" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--cobalt)">ORDER FACT</text>
+              <text x="307" y="186" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.fact_orders</text>
+              <text x="307" y="204" text-anchor="start" font-size="10" fill="var(--ink-muted)">99,441 rows · SLA &amp; Status</text>
+            </g>
+            <g class="star-node" data-g="fact_payments" onclick="selectGold('fact_payments')" onmouseenter="selectGold('fact_payments')" filter="url(#card-sh)">
+              <rect class="node-bg" x="295" y="238" width="215" height="78" rx="12" fill="var(--surface)" stroke="var(--amber)"/>
+              <rect x="307" y="247" width="84" height="17" rx="8" fill="var(--amber-soft)"/>
+              <text x="349" y="259" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--amber)">PAYMENT FACT</text>
+              <text x="307" y="282" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.fact_payments</text>
+              <text x="307" y="300" text-anchor="start" font-size="10" fill="var(--ink-muted)">103,886 rows · R$ 16.01M</text>
+            </g>
+            <g class="star-node" data-g="fact_reviews" onclick="selectGold('fact_reviews')" onmouseenter="selectGold('fact_reviews')" filter="url(#card-sh)">
+              <rect class="node-bg" x="550" y="92" width="212" height="82" rx="12" fill="var(--surface)" stroke="var(--crimson)"/>
+              <rect x="562" y="101" width="84" height="17" rx="8" fill="var(--crimson-soft)"/>
+              <text x="604" y="113" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--crimson)">SENTIMENT FACT</text>
+              <text x="562" y="136" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.fact_reviews</text>
+              <text x="562" y="155" text-anchor="start" font-size="10" fill="var(--ink-muted)">99,224 rows (MongoDB)</text>
+            </g>
+            <g class="star-node" data-g="fact_marketing_funnel" onclick="selectGold('fact_marketing_funnel')" onmouseenter="selectGold('fact_marketing_funnel')" filter="url(#card-sh)">
+              <rect class="node-bg" x="550" y="218" width="212" height="90" rx="12" fill="var(--surface)" stroke="var(--violet)"/>
+              <rect x="562" y="227" width="76" height="17" rx="8" fill="var(--violet-soft)"/>
+              <text x="600" y="239" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--violet)">FUNNEL FACT</text>
+              <text x="562" y="262" text-anchor="start" font-size="12" font-weight="700" fill="var(--ink)">gold.fact_marketing_funnel</text>
+              <text x="562" y="280" text-anchor="start" font-size="10" fill="var(--ink-muted)">8,000 MQLs -&gt; 842 Deals</text>
+              <text x="562" y="295" text-anchor="start" font-size="10" fill="var(--ink-muted)">380 Active Sellers</text>
+            </g>
           </g>
 
-          <!-- Dimensions -->
-          <g class="star-node" data-g="dim_date" onclick="selectGold('dim_date')" onmouseenter="selectGold('dim_date')" filter="url(#card-sh)">
-            <rect class="node-bg" x="18" y="36" width="174" height="68" rx="12" fill="var(--surface)" stroke="var(--teal)"/>
-            <rect x="28" y="45" width="44" height="17" rx="8" fill="var(--teal-soft)"/>
-            <text x="50" y="57" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--teal)">DIM</text>
-            <text x="28" y="79" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.dim_date</text>
-            <text x="28" y="95" text-anchor="start" font-size="10" fill="var(--ink-muted)">Calendar 2016–2020</text>
-          </g>
-          <g class="star-node" data-g="dim_customer" onclick="selectGold('dim_customer')" onmouseenter="selectGold('dim_customer')" filter="url(#card-sh)">
-            <rect class="node-bg" x="18" y="128" width="174" height="68" rx="12" fill="var(--surface)" stroke="var(--teal)"/>
-            <rect x="28" y="137" width="44" height="17" rx="8" fill="var(--teal-soft)"/>
-            <text x="50" y="149" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--teal)">DIM</text>
-            <text x="28" y="171" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.dim_customer</text>
-            <text x="28" y="187" text-anchor="start" font-size="10" fill="var(--ink-muted)">Customers + Geo</text>
-          </g>
-          <g class="star-node" data-g="dim_seller" onclick="selectGold('dim_seller')" onmouseenter="selectGold('dim_seller')" filter="url(#card-sh)">
-            <rect class="node-bg" x="18" y="220" width="174" height="68" rx="12" fill="var(--surface)" stroke="var(--teal)"/>
-            <rect x="28" y="229" width="44" height="17" rx="8" fill="var(--teal-soft)"/>
-            <text x="50" y="241" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--teal)">DIM</text>
-            <text x="28" y="263" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.dim_seller</text>
-            <text x="28" y="279" text-anchor="start" font-size="10" fill="var(--ink-muted)">Sellers + Geo + Deal</text>
-          </g>
-          <g class="star-node" data-g="dim_product" onclick="selectGold('dim_product')" onmouseenter="selectGold('dim_product')" filter="url(#card-sh)">
-            <rect class="node-bg" x="18" y="312" width="174" height="68" rx="12" fill="var(--surface)" stroke="var(--teal)"/>
-            <rect x="28" y="321" width="44" height="17" rx="8" fill="var(--teal-soft)"/>
-            <text x="50" y="333" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--teal)">DIM</text>
-            <text x="28" y="355" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.dim_product</text>
-            <text x="28" y="371" text-anchor="start" font-size="10" fill="var(--ink-muted)">Products + EN Trans</text>
+          <g id="starLayer3" style="display:none;">
+            <g class="star-edges-grp">
+              <path class="star-edge" data-edge="dim_date:fact_order_items" d="M 192 64 C 275 64, 285 68, 370 68"/>
+              <path class="star-edge-flow" data-edge="dim_date:fact_order_items" d="M 192 64 C 275 64, 285 68, 370 68"/>
+              <path class="star-edge" data-edge="dim_customer:fact_order_items" d="M 192 154 C 280 154, 285 82, 370 82"/>
+              <path class="star-edge-flow" data-edge="dim_customer:fact_order_items" d="M 192 154 C 280 154, 285 82, 370 82"/>
+              <path class="star-edge" data-edge="dim_seller:fact_order_items" d="M 192 246 C 285 246, 285 96, 370 96"/>
+              <path class="star-edge-flow" data-edge="dim_seller:fact_order_items" d="M 192 246 C 285 246, 285 96, 370 96"/>
+              <path class="star-edge" data-edge="dim_product:fact_order_items" d="M 192 346 C 295 346, 285 112, 370 112"/>
+              <path class="star-edge-flow" data-edge="dim_product:fact_order_items" d="M 192 346 C 295 346, 285 112, 370 112"/>
+
+              <path class="star-edge" data-edge="dim_date:fact_orders" d="M 192 76 C 285 76, 285 192, 370 192"/>
+              <path class="star-edge-flow" data-edge="dim_date:fact_orders" d="M 192 76 C 285 76, 285 192, 370 192"/>
+              <path class="star-edge" data-edge="dim_customer:fact_orders" d="M 192 168 C 280 168, 285 222, 370 222"/>
+              <path class="star-edge-flow" data-edge="dim_customer:fact_orders" d="M 192 168 C 280 168, 285 222, 370 222"/>
+
+              <path class="star-edge" data-edge="dim_date:fact_marketing_funnel" d="M 192 86 C 300 86, 280 316, 370 316"/>
+              <path class="star-edge-flow" data-edge="dim_date:fact_marketing_funnel" d="M 192 86 C 300 86, 280 316, 370 316"/>
+              <path class="star-edge" data-edge="dim_seller:fact_marketing_funnel" d="M 192 262 C 280 262, 285 348, 370 348"/>
+              <path class="star-edge-flow" data-edge="dim_seller:fact_marketing_funnel" d="M 192 262 C 280 262, 285 348, 370 348"/>
+            </g>
+
+            <g class="star-node" data-g="fact_order_items" onclick="selectGold('fact_order_items')" onmouseenter="selectGold('fact_order_items')" filter="url(#card-sh)">
+              <rect class="node-bg" x="370" y="46" width="320" height="86" rx="12" fill="var(--surface)" stroke="var(--cobalt)"/>
+              <rect x="384" y="56" width="84" height="17" rx="8" fill="var(--cobalt-soft)"/>
+              <text x="426" y="68" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--cobalt)">REVENUE FACT</text>
+              <text x="384" y="93" text-anchor="start" font-size="13" font-weight="700" fill="var(--ink)">gold.fact_order_items</text>
+              <text x="384" y="114" text-anchor="start" font-size="10.5" fill="var(--ink-muted)">112,650 rows · R$ 13.59M GMV · Freight R$ 2.25M</text>
+            </g>
+            <g class="star-node" data-g="fact_orders" onclick="selectGold('fact_orders')" onmouseenter="selectGold('fact_orders')" filter="url(#card-sh)">
+              <rect class="node-bg" x="370" y="162" width="320" height="96" rx="12" fill="var(--surface)" stroke="var(--cobalt)"/>
+              <rect x="384" y="172" width="166" height="17" rx="8" fill="var(--cobalt-soft)"/>
+              <text x="467" y="184" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--cobalt)">ORDER + PAY + REVIEW FACT</text>
+              <text x="384" y="210" text-anchor="start" font-size="13" font-weight="700" fill="var(--ink)">gold.fact_orders (Consolidated)</text>
+              <text x="384" y="230" text-anchor="start" font-size="10.5" fill="var(--ink-muted)">99,441 rows · SLA + Total Pay + Avg Review</text>
+              <text x="384" y="246" text-anchor="start" font-size="9.5" fill="var(--amber)">* Loses split-payment &amp; multi-review detail</text>
+            </g>
+            <g class="star-node" data-g="fact_marketing_funnel" onclick="selectGold('fact_marketing_funnel')" onmouseenter="selectGold('fact_marketing_funnel')" filter="url(#card-sh)">
+              <rect class="node-bg" x="370" y="288" width="320" height="90" rx="12" fill="var(--surface)" stroke="var(--violet)"/>
+              <rect x="384" y="298" width="96" height="17" rx="8" fill="var(--violet-soft)"/>
+              <text x="432" y="310" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--violet)">B2B FUNNEL FACT</text>
+              <text x="384" y="336" text-anchor="start" font-size="13" font-weight="700" fill="var(--ink)">gold.fact_marketing_funnel</text>
+              <text x="384" y="357" text-anchor="start" font-size="10.5" fill="var(--ink-muted)">8,000 MQLs -&gt; 842 Deals · 380 Active Sellers</text>
+            </g>
           </g>
 
-          <!-- Facts -->
-          <g class="star-node active" data-g="fact_order_items" onclick="selectGold('fact_order_items')" onmouseenter="selectGold('fact_order_items')" filter="url(#card-sh)">
-            <rect class="node-bg" x="295" y="46" width="215" height="78" rx="12" fill="var(--surface)" stroke="var(--cobalt)"/>
-            <rect x="307" y="55" width="76" height="17" rx="8" fill="var(--cobalt-soft)"/>
-            <text x="345" y="67" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--cobalt)">REVENUE FACT</text>
-            <text x="307" y="90" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.fact_order_items</text>
-            <text x="307" y="108" text-anchor="start" font-size="10" fill="var(--ink-muted)">112,650 rows · R$ 13.59M</text>
+          <g id="starLayer2" style="display:none;">
+            <g class="star-edges-grp">
+              <path class="star-edge" data-edge="dim_date:fact_order_items" d="M 192 66 C 280 66, 285 92, 370 92"/>
+              <path class="star-edge-flow" data-edge="dim_date:fact_order_items" d="M 192 66 C 280 66, 285 92, 370 92"/>
+              <path class="star-edge" data-edge="dim_customer:fact_order_items" d="M 192 162 C 280 162, 285 118, 370 118"/>
+              <path class="star-edge-flow" data-edge="dim_customer:fact_order_items" d="M 192 162 C 280 162, 285 118, 370 118"/>
+              <path class="star-edge" data-edge="dim_seller:fact_order_items" d="M 192 246 C 285 246, 285 144, 370 144"/>
+              <path class="star-edge-flow" data-edge="dim_seller:fact_order_items" d="M 192 246 C 285 246, 285 144, 370 144"/>
+              <path class="star-edge" data-edge="dim_product:fact_order_items" d="M 192 346 C 295 346, 285 170, 370 170"/>
+              <path class="star-edge-flow" data-edge="dim_product:fact_order_items" d="M 192 346 C 295 346, 285 170, 370 170"/>
+
+              <path class="star-edge" data-edge="dim_date:fact_marketing_funnel" d="M 192 84 C 300 84, 285 268, 370 268"/>
+              <path class="star-edge-flow" data-edge="dim_date:fact_marketing_funnel" d="M 192 84 C 300 84, 285 268, 370 268"/>
+              <path class="star-edge" data-edge="dim_seller:fact_marketing_funnel" d="M 192 262 C 280 262, 285 308, 370 308"/>
+              <path class="star-edge-flow" data-edge="dim_seller:fact_marketing_funnel" d="M 192 262 C 280 262, 285 308, 370 308"/>
+            </g>
+
+            <g class="star-node" data-g="fact_order_items" onclick="selectGold('fact_order_items')" onmouseenter="selectGold('fact_order_items')" filter="url(#card-sh)">
+              <rect class="node-bg" x="370" y="68" width="335" height="122" rx="12" fill="var(--surface)" stroke="var(--cobalt)"/>
+              <rect x="384" y="79" width="132" height="17" rx="8" fill="var(--cobalt-soft)"/>
+              <text x="450" y="91" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--cobalt)">B2C COMBINED FACT</text>
+              <text x="384" y="118" text-anchor="start" font-size="13.5" font-weight="700" fill="var(--ink)">gold.fact_sales (items + order)</text>
+              <text x="384" y="139" text-anchor="start" font-size="10.5" fill="var(--ink-muted)">112,650 rows · GMV + Order SLA + Agg Pay/Rev</text>
+              <text x="384" y="160" text-anchor="start" font-size="10" fill="var(--crimson)">! Must use DISTINCTCOUNT(order_id) in Power BI</text>
+              <text x="384" y="176" text-anchor="start" font-size="9.5" fill="var(--amber)">! Excludes 775 itemless paid orders unless FULL JOIN</text>
+            </g>
+            <g class="star-node" data-g="fact_marketing_funnel" onclick="selectGold('fact_marketing_funnel')" onmouseenter="selectGold('fact_marketing_funnel')" filter="url(#card-sh)">
+              <rect class="node-bg" x="370" y="236" width="335" height="106" rx="12" fill="var(--surface)" stroke="var(--violet)"/>
+              <rect x="384" y="247" width="102" height="17" rx="8" fill="var(--violet-soft)"/>
+              <text x="435" y="259" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--violet)">B2B FUNNEL FACT</text>
+              <text x="384" y="286" text-anchor="start" font-size="13.5" font-weight="700" fill="var(--ink)">gold.fact_marketing_funnel</text>
+              <text x="384" y="308" text-anchor="start" font-size="10.5" fill="var(--ink-muted)">8,000 MQLs -&gt; 842 Closed Deals · 380 Active</text>
+              <text x="384" y="326" text-anchor="start" font-size="9.5" fill="var(--ink-muted)">Isolated from B2C sales (462 sellers have 0 orders)</text>
+            </g>
           </g>
-          <g class="star-node" data-g="fact_orders" onclick="selectGold('fact_orders')" onmouseenter="selectGold('fact_orders')" filter="url(#card-sh)">
-            <rect class="node-bg" x="295" y="142" width="215" height="78" rx="12" fill="var(--surface)" stroke="var(--cobalt)"/>
-            <rect x="307" y="151" width="70" height="17" rx="8" fill="var(--cobalt-soft)"/>
-            <text x="342" y="163" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--cobalt)">ORDER FACT</text>
-            <text x="307" y="186" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.fact_orders</text>
-            <text x="307" y="204" text-anchor="start" font-size="10" fill="var(--ink-muted)">99,441 rows · SLA &amp; Status</text>
-          </g>
-          <g class="star-node" data-g="fact_payments" onclick="selectGold('fact_payments')" onmouseenter="selectGold('fact_payments')" filter="url(#card-sh)">
-            <rect class="node-bg" x="295" y="238" width="215" height="78" rx="12" fill="var(--surface)" stroke="var(--amber)"/>
-            <rect x="307" y="247" width="84" height="17" rx="8" fill="var(--amber-soft)"/>
-            <text x="349" y="259" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--amber)">PAYMENT FACT</text>
-            <text x="307" y="282" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.fact_payments</text>
-            <text x="307" y="300" text-anchor="start" font-size="10" fill="var(--ink-muted)">103,886 rows · R$ 16.01M</text>
-          </g>
-          <g class="star-node" data-g="fact_reviews" onclick="selectGold('fact_reviews')" onmouseenter="selectGold('fact_reviews')" filter="url(#card-sh)">
-            <rect class="node-bg" x="550" y="92" width="212" height="82" rx="12" fill="var(--surface)" stroke="var(--crimson)"/>
-            <rect x="562" y="101" width="84" height="17" rx="8" fill="var(--crimson-soft)"/>
-            <text x="604" y="113" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--crimson)">SENTIMENT FACT</text>
-            <text x="562" y="136" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.fact_reviews</text>
-            <text x="562" y="155" text-anchor="start" font-size="10" fill="var(--ink-muted)">99,224 rows (MongoDB)</text>
-          </g>
-          <g class="star-node" data-g="fact_marketing_funnel" onclick="selectGold('fact_marketing_funnel')" onmouseenter="selectGold('fact_marketing_funnel')" filter="url(#card-sh)">
-            <rect class="node-bg" x="550" y="218" width="212" height="90" rx="12" fill="var(--surface)" stroke="var(--violet)"/>
-            <rect x="562" y="227" width="76" height="17" rx="8" fill="var(--violet-soft)"/>
-            <text x="600" y="239" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--violet)">FUNNEL FACT</text>
-            <text x="562" y="262" text-anchor="start" font-size="12" font-weight="700" fill="var(--ink)">gold.fact_marketing_funnel</text>
-            <text x="562" y="280" text-anchor="start" font-size="10" fill="var(--ink-muted)">8,000 MQLs -&gt; 842 Deals</text>
-            <text x="562" y="295" text-anchor="start" font-size="10" fill="var(--ink-muted)">380 Active Sellers</text>
+
+          <!-- Dimensions (Shared Across All 3 Designs) -->
+          <g id="starDims">
+            <g class="star-node" data-g="dim_date" onclick="selectGold('dim_date')" onmouseenter="selectGold('dim_date')" filter="url(#card-sh)">
+              <rect class="node-bg" x="18" y="36" width="174" height="68" rx="12" fill="var(--surface)" stroke="var(--teal)"/>
+              <rect x="28" y="45" width="44" height="17" rx="8" fill="var(--teal-soft)"/>
+              <text x="50" y="57" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--teal)">DIM</text>
+              <text x="28" y="79" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.dim_date</text>
+              <text x="28" y="95" text-anchor="start" font-size="10" fill="var(--ink-muted)">Calendar 2016–2020</text>
+            </g>
+            <g class="star-node" data-g="dim_customer" onclick="selectGold('dim_customer')" onmouseenter="selectGold('dim_customer')" filter="url(#card-sh)">
+              <rect class="node-bg" x="18" y="128" width="174" height="68" rx="12" fill="var(--surface)" stroke="var(--teal)"/>
+              <rect x="28" y="137" width="44" height="17" rx="8" fill="var(--teal-soft)"/>
+              <text x="50" y="149" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--teal)">DIM</text>
+              <text x="28" y="171" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.dim_customer</text>
+              <text x="28" y="187" text-anchor="start" font-size="10" fill="var(--ink-muted)">Customers + Geo</text>
+            </g>
+            <g class="star-node" data-g="dim_seller" onclick="selectGold('dim_seller')" onmouseenter="selectGold('dim_seller')" filter="url(#card-sh)">
+              <rect class="node-bg" x="18" y="220" width="174" height="68" rx="12" fill="var(--surface)" stroke="var(--teal)"/>
+              <rect x="28" y="229" width="44" height="17" rx="8" fill="var(--teal-soft)"/>
+              <text x="50" y="241" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--teal)">DIM</text>
+              <text x="28" y="263" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.dim_seller</text>
+              <text x="28" y="279" text-anchor="start" font-size="10" fill="var(--ink-muted)">Sellers + Geo + Deal</text>
+            </g>
+            <g class="star-node" data-g="dim_product" onclick="selectGold('dim_product')" onmouseenter="selectGold('dim_product')" filter="url(#card-sh)">
+              <rect class="node-bg" x="18" y="312" width="174" height="68" rx="12" fill="var(--surface)" stroke="var(--teal)"/>
+              <rect x="28" y="321" width="44" height="17" rx="8" fill="var(--teal-soft)"/>
+              <text x="50" y="333" text-anchor="middle" font-size="9.5" font-weight="700" fill="var(--teal)">DIM</text>
+              <text x="28" y="355" text-anchor="start" font-size="12.5" font-weight="700" fill="var(--ink)">gold.dim_product</text>
+              <text x="28" y="371" text-anchor="start" font-size="10" fill="var(--ink-muted)">Products + EN Trans</text>
+            </g>
           </g>
         </svg>
       </div>
@@ -861,6 +996,178 @@
     fact_marketing_funnel: ["dim_date", "dim_seller"]
   };
   let starAllFlow = false;
+  let currentStarMode = "5";
+  let currentGoldKey = "fact_order_items";
+
+  const STAR_MODES = {
+    "5": {
+      badge: "5 Isolated Facts",
+      svgTitle: "GRAIN-ISOLATED FACT TABLES (5)",
+      title: "التصميم 1: 5 Fact Tables (منهجية Kimball القياسية — الأدق 100%)",
+      summary: "كل مستوى تفصيل (Grain) له جدول Fact مستقل تماماً: البنود، الطلبات، المدفوعات، التقييمات، وقمع التسويق B2B.",
+      activeFacts: ["fact_order_items", "fact_orders", "fact_payments", "fact_reviews", "fact_marketing_funnel"],
+      factsList: [
+        "fact_order_items (112,650) — المبيعات والشحن",
+        "fact_orders (99,441) — دورة الحياة وSLA",
+        "fact_payments (103,886) — وسائل الدفع والأقساط",
+        "fact_reviews (99,224) — التقييمات بدون Fan-out",
+        "fact_marketing_funnel (8,000) — قمع B2B"
+      ],
+      pros: [
+        "دقة مالية 100%: مستحيل يحصل تضاعف إيرادات (+72.3k) أو خسارة 775 طلب مدفوع بلا بنود.",
+        "حفظ كامل لتفاصيل الدفع المتعدد (حتى 29 دفعة) والتقييمات المتعددة.",
+        "مقاييس Power BI مباشرة بـ SUM() و COUNTROWS() بدون DAX معقد."
+      ],
+      cons: [
+        "عدد جداول Fact أكبر (5 جداول) داخل نموذج Power BI.",
+        "يحتاج علاقات دقيقة مع الـ 4 Dimensions المشتركة (Conformed Dimensions)."
+      ],
+      silverMap: [
+        ["silver.customers + silver.geolocation_zip_reference", "gold.dim_customer (LEFT JOIN على ZIP لمنع Snowflake)"],
+        ["silver.sellers + silver.geolocation_zip_reference + silver.closed_deals", "gold.dim_seller (إحداثيات التاجر + قطاعه التجاري)"],
+        ["silver.products + silver.product_category_name_translation", "gold.dim_product (ترجمة الـ 73 فئة + الأبعاد)"],
+        ["silver.order_items (+ orders.status/date)", "gold.fact_order_items (112,650 بند)"],
+        ["silver.orders (+ ملخص order_items)", "gold.fact_orders (99,441 طلب)"],
+        ["silver.order_payments (+ orders.status/date)", "gold.fact_payments (103,886 عملية دفع)"],
+        ["silver.order_reviews (MongoDB + is_late_delivery)", "gold.fact_reviews (99,224 تقييم)"],
+        ["silver.marketing_qualified_leads + silver.closed_deals", "gold.fact_marketing_funnel (8,000 MQL ← 842 صفقة)"]
+      ],
+      mergedNote: {},
+      overrides: {}
+    },
+    "3": {
+      badge: "3 Balanced Facts",
+      svgTitle: "BALANCED FACT TABLES (3)",
+      title: "التصميم 2: 3 Fact Tables (الحل الوسط المتوازن — بسيط وآمن بدون Fan-out)",
+      summary: "دمج ملخص الدفع وملخص التقييمات على مستوى الطلب الواحد داخل fact_orders (99,441 صف)، مع إبقاء fact_order_items و fact_marketing_funnel منفصلين.",
+      activeFacts: ["fact_order_items", "fact_orders", "fact_marketing_funnel"],
+      factsList: [
+        "fact_order_items (112,650) — البنود والمنتجات والبائعين",
+        "fact_orders (99,441) — الطلب + SLA + إجمالي الدفع + متوسط التقييم",
+        "fact_marketing_funnel (8,000) — قمع B2B المنفصل"
+      ],
+      pros: [
+        "نموذج أبسط وأخف في Power BI (3 جداول Fact فقط) ومناسب لبداية الفريق.",
+        "لا يزال آمناً من فخ Fan-out لأن fact_orders صف واحد لكل طلب.",
+        "يحفظ الـ 775 طلب المدفوع بلا بنود داخل fact_orders."
+      ],
+      cons: [
+        "فقدان تفاصيل تعدد وسائل الدفع للطلب الواحد (بتاخد الوسيلة الرئيسية + has_voucher بدل فصل كل دفعة).",
+        "تلخيص الطلبات ذات التقييمين إلى متوسط (avg_review_score) بدل قراءة كل تقييم على حدة."
+      ],
+      silverMap: [
+        ["silver.customers + silver.geolocation_zip_reference", "gold.dim_customer (LEFT JOIN على ZIP لمنع Snowflake)"],
+        ["silver.sellers + silver.geolocation_zip_reference + silver.closed_deals", "gold.dim_seller (إحداثيات التاجر + قطاعه التجاري)"],
+        ["silver.products + silver.product_category_name_translation", "gold.dim_product (ترجمة الـ 73 فئة + الأبعاد)"],
+        ["silver.order_items (+ orders.status/date)", "gold.fact_order_items (112,650 بند)"],
+        ["silver.orders + تجميع order_payments + تجميع order_reviews", "gold.fact_orders (99,441 طلب مجمّع الدفع والتقييم على order_id)"],
+        ["silver.marketing_qualified_leads + silver.closed_deals", "gold.fact_marketing_funnel (8,000 MQL ← 842 صفقة)"]
+      ],
+      mergedNote: {
+        fact_payments: "في تصميم الـ 3 Fact Tables، يتم تجميع المدفوعات على مستوى order_id وإضافتها داخل gold.fact_orders (total_payment_value, primary_payment_type, max_installments) — مما يقلل الجداول لكنه يفقد تفصيل الدفع المقسّم لـ 2,961 طلباً.",
+        fact_reviews: "في تصميم الـ 3 Fact Tables، يتم تلخيص التقييمات على مستوى order_id وإضافتها داخل gold.fact_orders (avg_review_score, reviews_count) — مما يمنع الـ Fan-out لكنه يخفي نصوص التقييمات الفردية لـ 544 طلباً."
+      },
+      overrides: {
+        fact_orders: {
+          type: "Consolidated Order + Pay + Review Fact",
+          grain: "طلب واحد (order_id) — 99,441 صفاً (شامل ملخص الدفع والتقييم)",
+          sources: ["silver.orders", "Aggregated order_items", "Aggregated order_payments", "Aggregated order_reviews (MongoDB)"],
+          desc: "جدول الطلبات الموحّد في تصميم الـ 3 جداول: يجمع دورة الحياة والـ SLA مع إجمالي الدفع ووسيلته الرئيسية ومتوسط التقييم على مستوى الطلب الواحد بدون تضاعف."
+        }
+      }
+    },
+    "2": {
+      badge: "2 Minimalist Facts",
+      svgTitle: "MINIMALIST FACT TABLES (2)",
+      title: "التصميم 3: 2 Fact Tables (الحد الأدنى الممكن — B2C + B2B فقط)",
+      summary: "فصل عالم المبيعات B2C في جدول واحد (fact_sales المبني على order_items) وعالم اكتساب البائعين B2B في fact_marketing_funnel.",
+      activeFacts: ["fact_order_items", "fact_marketing_funnel"],
+      factsList: [
+        "fact_sales / order_items (112,650) — البنود + خصائص الطلب + ملخص دفع/تقييم",
+        "fact_marketing_funnel (8,000) — قمع B2B (لا يمكن دمجه مع B2C)"
+      ],
+      pros: [
+        "أصغر عدد ممكن من جداول الحقائق (جدولان فقط)؛ أسهل شكل مبدئي للمستخدم غير التقني.",
+        "ما زال يحترم الفصل الإجباري بين B2C و B2B (462 تاجراً بلا طلبات)."
+      ],
+      cons: [
+        "مخاطرة عالية في Power BI: أي عمود على مستوى الطلب (مثل payment_value أو delivery_days) يتكرر مع كل بند ويفسد لو استُخدم بـ SUM()!",
+        "يتطلب DAX منضبط مثل DISTINCTCOUNT(order_id) ومعالجة خاصة للـ 775 طلباً المدفوعة بلا بنود.",
+        "فقدان تفاصيل الدفع المتعدد والتقييمات المتعددة وحالات الطلبات الملغاة بدون بنود."
+      ],
+      silverMap: [
+        ["silver.customers + silver.geolocation_zip_reference", "gold.dim_customer (LEFT JOIN على ZIP لمنع Snowflake)"],
+        ["silver.sellers + silver.geolocation_zip_reference + silver.closed_deals", "gold.dim_seller (إحداثيات التاجر + قطاعه التجاري)"],
+        ["silver.products + silver.product_category_name_translation", "gold.dim_product (ترجمة الـ 73 فئة + الأبعاد)"],
+        ["silver.order_items + silver.orders + ملخص order_payments + ملخص order_reviews", "gold.fact_sales (112,650 بند — مع أعمدة الطلب والدفع والتقييم المجمعة)"],
+        ["silver.marketing_qualified_leads + silver.closed_deals", "gold.fact_marketing_funnel (8,000 MQL ← 842 صفقة)"]
+      ],
+      mergedNote: {
+        fact_orders: "في تصميم الـ 2 Fact Tables، تُنقل تواريخ الطلب وحالة الشحن كأعمدة مساعدة داخل fact_sales (order_items)، مما يفرض استخدام DISTINCTCOUNT(order_id) ويُخرج الطلبات التي بلا بنود ما لم يُستخدم FULL OUTER JOIN.",
+        fact_payments: "في تصميم الـ 2 Fact Tables، يُختزل الدفع إلى أعمدة ملخصة على مستوى الطلب داخل fact_sales — وخطر جمعها بـ SUM() مرتفع لأن السطر الواحد يمثل بنداً وليس طلباً.",
+        fact_reviews: "في تصميم الـ 2 Fact Tables، يُختزل التقييم إلى درجة متوسطة داخل fact_sales؛ ما يضيع تفاصيل التقييمات المتعددة والتقييمات المرتبطة بطلبات بلا بنود."
+      },
+      overrides: {
+        fact_order_items: {
+          type: "Combined B2C Sales Fact (Minimalist)",
+          grain: "بند واحد (order_id, order_item_id) — مع أعمدة طلب مدمجة (احذر SUM على أعمدة الطلب!)",
+          sources: ["silver.order_items", "silver.orders", "Aggregated payments & reviews"],
+          desc: "جدول المبيعات الموحّد (fact_sales) في التصميم ثنائي الحقائق: يدمج خصائص الطلب وملخص الدفع والتقييم مع البنود، لكنه يتطلب حذراً شديداً في DAX وتنتفي فيه تفاصيل الدفع والتقييم المتعدد."
+        }
+      }
+    }
+  };
+
+  function setStarMode(mode) {
+    currentStarMode = mode;
+    const cfg = STAR_MODES[mode];
+    if (!cfg) return;
+
+    document.querySelectorAll("#starModeBar .star-mode-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.mode === mode);
+    });
+
+    document.getElementById("starFactsBadge").textContent = cfg.badge;
+    document.getElementById("starFactsHeader").textContent = cfg.svgTitle;
+    ["5", "3", "2"].forEach(m => {
+      const layer = document.getElementById("starLayer" + m);
+      if (layer) layer.style.display = (m === mode ? "" : "none");
+    });
+
+    document.getElementById("starModeExplain").innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <strong style="font-size:1.02rem;color:var(--ink);">${esc(cfg.title)}</strong>
+        <span class="badge ${mode === '5' ? 'b-teal' : mode === '3' ? 'b-cobalt' : 'b-amber'}">${esc(cfg.badge)}</span>
+      </div>
+      <p style="margin:6px 0 0;font-size:0.88rem;color:var(--ink-soft);">${esc(cfg.summary)}</p>
+      <div class="star-mode-cols">
+        <div class="star-mode-col">
+          <strong style="color:var(--cobalt);">جداول الحقائق في هذا التصميم:</strong>
+          <ul>${cfg.factsList.map(x => `<li class="mono" style="font-size:0.79rem;">${esc(x)}</li>`).join("")}</ul>
+        </div>
+        <div class="star-mode-col">
+          <strong style="color:var(--teal);">المميزات:</strong>
+          <ul>${cfg.pros.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+        </div>
+        <div class="star-mode-col">
+          <strong style="color:var(--crimson);">العيوب والتنازلات:</strong>
+          <ul>${cfg.cons.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+        </div>
+      </div>
+      <div class="star-map-box">
+        <strong style="color:var(--ink);">أين تذهب جميع جداول Silver الـ 11 في هذا التصميم؟ (بما فيها Geolocation و Translation و Closed Deals):</strong>
+        <div class="star-map-grid">
+          ${(cfg.silverMap || []).map(m => `<div class="star-map-item"><span class="mono" style="font-weight:600;color:var(--ink);">${esc(m[0])}</span> <span>←</span> <span class="mono" style="color:var(--teal);">${esc(m[1])}</span></div>`).join("")}
+        </div>
+      </div>
+    `;
+
+    const activeSet = new Set(cfg.activeFacts);
+    if (currentGoldKey.startsWith("fact_") && !activeSet.has(currentGoldKey)) {
+      currentGoldKey = "fact_order_items";
+    }
+    selectGold(currentGoldKey);
+  }
 
   function toggleStarFlow() {
     starAllFlow = !starAllFlow;
@@ -869,21 +1176,59 @@
   }
 
   function selectGold(key) {
-    const g = GOLD_TABLES[key];
-    if (!g) return;
-    const neighbors = new Set(GOLD_EDGES[key] || []);
-    document.querySelectorAll(".star-node").forEach(n => {
+    const base = GOLD_TABLES[key];
+    if (!base) return;
+    currentGoldKey = key;
+    const cfg = STAR_MODES[currentStarMode];
+    const activeFacts = new Set(cfg.activeFacts);
+    const isMergedOut = key.startsWith("fact_") && !activeFacts.has(key);
+    const g = (cfg.overrides && cfg.overrides[key]) ? Object.assign({}, base, cfg.overrides[key]) : base;
+
+    const rawNeighbors = GOLD_EDGES[key] || [];
+    const neighbors = new Set(
+      isMergedOut ? [] : rawNeighbors.filter(x => !x.startsWith("fact_") || activeFacts.has(x))
+    );
+
+    const activeLayer = document.getElementById("starLayer" + currentStarMode);
+    document.querySelectorAll("#starDims .star-node").forEach(n => {
       const nk = n.dataset.g;
       n.classList.toggle("active", nk === key);
       n.classList.toggle("connected", nk !== key && neighbors.has(nk));
       n.classList.toggle("dimmed", nk !== key && !neighbors.has(nk));
     });
-    document.querySelectorAll("#starEdges .star-edge, #starEdges .star-edge-flow").forEach(edge => {
-      const [a, b] = (edge.dataset.edge || "").split(":");
-      const isLit = (a === key && neighbors.has(b)) || (b === key && neighbors.has(a));
-      edge.classList.toggle("lit", isLit);
-    });
-    const connBtns = (GOLD_EDGES[key] || []).map(c =>
+    if (activeLayer) {
+      activeLayer.querySelectorAll(".star-node").forEach(n => {
+        const nk = n.dataset.g;
+        n.classList.toggle("active", nk === key);
+        n.classList.toggle("connected", nk !== key && neighbors.has(nk));
+        n.classList.toggle("dimmed", nk !== key && !neighbors.has(nk));
+      });
+      activeLayer.querySelectorAll(".star-edge, .star-edge-flow").forEach(edge => {
+        const [a, b] = (edge.dataset.edge || "").split(":");
+        const isLit = !isMergedOut && ((a === key && neighbors.has(b)) || (b === key && neighbors.has(a)));
+        edge.classList.toggle("lit", isLit);
+      });
+    }
+
+    if (isMergedOut) {
+      document.getElementById("goldInspector").innerHTML = `
+        <div>
+          <span class="badge b-amber">مدمج / مستبعد في تصميم ${esc(cfg.badge)}</span>
+          <h3 class="mono" style="margin:10px 0 6px;font-size:1.22rem;">gold.${esc(key)}</h3>
+          <p style="margin:0 0 14px;font-size:0.92rem;color:var(--ink-soft);">${esc(cfg.mergedNote[key] || "")}</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="setStarMode('5')">العودة لتصميم 5 Fact Tables</button>
+            <button class="btn" onclick="selectGold('${currentStarMode === '3' ? 'fact_orders' : 'fact_order_items'}')">عرض الجدول البديل</button>
+          </div>
+        </div>
+        <div style="font-size:0.8rem;color:var(--ink-muted);border-top:1px solid var(--line);padding-top:10px;margin-top:auto;">
+          تلميح: استخدم أزرار التصاميم الثلاثة أعلاه للمقارنة بين 5 و 3 و 2 Fact Tables.
+        </div>
+      `;
+      return;
+    }
+
+    const connBtns = Array.from(neighbors).map(c =>
       `<button class="pill" style="font-size:0.76rem;padding:4px 10px;" onclick="selectGold('${c}')">gold.${esc(c)}</button>`
     ).join("");
     document.getElementById("goldInspector").innerHTML = `
@@ -899,19 +1244,19 @@
           </ul>
         </div>
         <div>
-          <strong style="font-size:0.84rem;display:block;margin-bottom:6px;">مرتبط مباشرة بـ (${(GOLD_EDGES[key] || []).length}):</strong>
+          <strong style="font-size:0.84rem;display:block;margin-bottom:6px;">مرتبط مباشرة بـ (${neighbors.size}):</strong>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">${connBtns}</div>
         </div>
       </div>
       <div style="font-size:0.8rem;color:var(--ink-muted);border-top:1px solid var(--line);padding-top:10px;margin-top:auto;">
-        تلميح: اضغط أو مرّر على أي جدول لإضاءة علاقاته وانسياب البيانات، أو استخدم زر «تشغيل حركة كل العلاقات».
+        تلميح: اضغط أو مرّر على أي جدول لإضاءة علاقاته وانسياب البيانات، أو بدّل بين الـ 3 تصميمات أعلاه.
       </div>
     `;
   }
 
   document.addEventListener("DOMContentLoaded", () => {
     renderDictList();
-    selectGold("fact_order_items");
+    setStarMode("5");
   });
 </script>
 </body>
