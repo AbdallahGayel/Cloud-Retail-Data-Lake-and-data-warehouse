@@ -271,6 +271,35 @@
     display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
     font-size: 0.82rem; color: var(--ink-muted);
   }
+  html, body { overflow-x: clip; max-width: 100%; }
+  .page, .sec, .card, .hero, .mart-card, .kpi-card, .star-canvas-wrap, .star-mode-explain, .tbl-detail, .explainer-box, .decision-banner { min-width: 0; max-width: 100%; }
+  .grid-2 > *, .grid-3 > *, .hero > *, .star-layout > *, .dict-layout > * { min-width: 0; max-width: 100%; }
+  @media (max-width: 980px) { .grid-2, .grid-3, .star-layout, .hero, .dict-layout { grid-template-columns: minmax(0, 1fr); } }
+  .mono { max-width: 100%; overflow-wrap: anywhere; word-break: break-word; }
+  @media (max-width: 768px) {
+    .topbar { position: static; }
+    .topbar-inner { padding: 10px 14px; gap: 8px; }
+    .brand { font-size: 0.9rem; }
+    .nav-links { width: 100%; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+    .nav-link { white-space: nowrap; flex-shrink: 0; font-size: 0.8rem; padding: 5px 9px; }
+    .controls { width: 100%; }
+    .page { padding: 16px 12px 48px; }
+    .hero { padding: 18px 14px; gap: 18px; border-radius: 14px; }
+    .card, .mart-card, .kpi-card, .tbl-detail, .star-canvas-wrap, .star-mode-explain { padding: 15px 13px; }
+    .sla-shock { grid-template-columns: 1fr; text-align: center; gap: 8px; padding: 14px; }
+    .kpi-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .kpi-val { font-size: 1.08rem; }
+    .search-box { min-width: 0; width: 100%; }
+    .star-mode-btn { min-width: 100%; }
+    .star-canvas-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .star-canvas-wrap svg { min-width: 620px; }
+    .badge { white-space: normal; }
+    .kpi-formula { overflow-x: auto; font-size: 0.75rem; }
+    table.col-tbl th, table.col-tbl td { padding: 8px 6px; font-size: 0.78rem; }
+  }
+  @media (max-width: 420px) {
+    .kpi-strip { grid-template-columns: 1fr; }
+  }
   @media print {
     .topbar, .controls, .dict-controls { display: none !important; }
     body { background: #fff; color: #000; }

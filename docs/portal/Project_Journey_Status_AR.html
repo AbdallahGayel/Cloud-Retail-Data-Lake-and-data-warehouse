@@ -635,6 +635,22 @@
     font-size: 0.83rem;
     color: var(--ink-muted);
   }
+  html, body { overflow-x: clip; max-width: 100%; }
+  .hero, .panel, .arch-panel, .poster-bar, .step-card, .kpi-box { min-width: 0; max-width: 100%; }
+  .mono { max-width: 100%; overflow-wrap: anywhere; word-break: break-word; }
+  @media (max-width: 768px) {
+    .topbar { position: static; }
+    .topbar-inner { padding: 10px 14px; gap: 8px; }
+    .nav-links { width: 100%; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+    .nav-link { white-space: nowrap; flex-shrink: 0; font-size: 0.8rem; padding: 5px 9px; }
+    .controls-bar { width: 100%; flex-wrap: wrap; }
+    .page { padding: 16px 12px 48px; }
+    .hero { padding: 18px 14px; gap: 18px; }
+    .panel, .arch-panel, .step-card { padding: 15px 13px; }
+    .poster-bar { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .kpi-grid { grid-template-columns: 1fr; }
+    .badge { white-space: normal; }
+  }
 </style>
 </head>
 <body>
